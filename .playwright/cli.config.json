@@ -1,0 +1,5 @@
+{
+  "launchOptions": {
+    "args": ["--ignore-certificate-errors"]
+  }
+}

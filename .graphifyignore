@@ -1,0 +1,23 @@
+# Dependencies and package manager output
+node_modules/
+vendor/
+
+# Build artifacts and generated bundles
+dist/
+graphify-out/
+
+# Git internals
+.git/
+
+# Local agent/worktree directories
+.kilo/
+.letta/
+.history/
+.codex/
+.gemini/
+.antigravitycli/
+.opencode/
+
+# Optional local noise
+.DS_Store
+Thumbs.db

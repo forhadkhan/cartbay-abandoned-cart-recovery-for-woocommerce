@@ -1,0 +1,16 @@
+# Dependencies bundled by AI tooling
+node_modules/
+
+# AI-tool caches and generated output
+.history/
+.kilo/
+.letta/
+.opencode/
+graphify-out/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+
+*.zip

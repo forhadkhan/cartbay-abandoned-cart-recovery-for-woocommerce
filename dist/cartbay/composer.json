@@ -1,0 +1,14 @@
+{
+	"name": "wpanchorbay/cartbay",
+	"description": "Abandoned Cart Recovery for WooCommerce",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=8.2"
+	},
+	"autoload": {
+		"psr-4": {
+			"WPAnchorBay\\CartBay\\": "app/"
+		}
+	}
+}
