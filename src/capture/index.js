@@ -157,7 +157,9 @@
 		checkbox.className = 'woocommerce-form__input woocommerce-form__input-checkbox input-checkbox';
 		checkbox.name = 'cartbay_consent';
 		checkbox.value = '1';
-		checkbox.checked = consentDefaultState !== 'unchecked';
+		// Only the exact literal 'checked' pre-ticks the box; anything else
+		// leaves consent to be given explicitly.
+		checkbox.checked = consentDefaultState === 'checked';
 
 		var span = document.createElement('span');
 		span.textContent = consentText;

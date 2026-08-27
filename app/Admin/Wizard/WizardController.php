@@ -9,6 +9,7 @@ namespace WPAnchorBay\CartBay\Admin\Wizard;
 
 use WPAnchorBay\CartBay\Admin\Settings\AdminEnvironment;
 use WPAnchorBay\CartBay\Core\Container;
+use WPAnchorBay\CartBay\Core\Settings;
 use WPAnchorBay\CartBay\Recovery\SequenceSettings;
 
 defined( 'ABSPATH' ) || exit;
@@ -318,8 +319,27 @@ class WizardController {
 		<p class="description"><?php esc_html_e( 'CartBay hands recovery emails to WordPress and WooCommerce for delivery — it does not send email itself. If sending is unreliable, the fix is your site\'s mail setup, not CartBay.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ); ?></p>
 
 		<?php if ( ! empty( $status['has_delivery'] ) ) : ?>
+			<?php
+			// Only a named plugin match justifies the confident wording; a
+			// hook-based match is an inference and is worded as one.
+			$delivery_source = (string) ( $status['delivery']['source'] ?? '' );
+			$delivery_detail = (string) ( $status['delivery']['detail'] ?? '' );
+			$named_delivery  = in_array( $delivery_source, array( 'known_plugin', 'plugin_metadata' ), true ) && '' !== $delivery_detail;
+			?>
 			<div class="notice notice-success inline is-dismissible cartbay-notice-auto-dismiss">
-				<p><?php esc_html_e( 'SMTP delivery detected. Your emails should deliver reliably.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ); ?></p>
+				<p>
+				<?php
+				if ( $named_delivery ) {
+					printf(
+						/* translators: %s: name of the detected mail delivery plugin. */
+						esc_html__( 'SMTP delivery detected: %s. Your emails should deliver reliably.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+						esc_html( $delivery_detail )
+					);
+				} else {
+					esc_html_e( 'A mail delivery plugin appears to be handling delivery.', 'cartbay-abandoned-cart-recovery-for-woocommerce' );
+				}
+				?>
+				</p>
 			</div>
 		<?php elseif ( ! empty( $status['has_logger'] ) ) : ?>
 			<div class="notice notice-warning inline is-dismissible cartbay-notice-auto-dismiss">
@@ -414,9 +434,8 @@ class WizardController {
 				$settings['consent_text'] = sanitize_text_field( wp_unslash( $_POST['cartbay_consent_text'] ?? '' ) );
 				// phpcs:ignore WordPress.Security.NonceVerification -- nonce verified in render().
 				$consent_default_state             = sanitize_key( wp_unslash( $_POST['cartbay_consent_default_state'] ?? 'unchecked' ) );
-				$settings['consent_default_state'] = 'checked' === $consent_default_state ? 'checked' : 'unchecked';
-				// phpcs:ignore WordPress.Security.NonceVerification -- nonce verified in render().
-				$settings['abandonment_timeout'] = absint( $_POST['cartbay_abandonment_timeout'] ?? 30 );
+				$settings['consent_default_state'] = Settings::normalize_consent_default_state( $consent_default_state );
+				$settings['abandonment_timeout']   = Settings::clamp_abandonment_timeout( wp_unslash( $_POST['cartbay_abandonment_timeout'] ?? Settings::ABANDONMENT_TIMEOUT_DEFAULT ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in render(); value clamped to an integer range by clamp_abandonment_timeout().
 				update_option( 'cartbay_settings', $settings );
 
 				$existing_campaign = get_option( 'cartbay_campaign_settings', array() );

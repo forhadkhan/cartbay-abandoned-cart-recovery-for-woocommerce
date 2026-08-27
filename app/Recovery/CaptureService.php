@@ -578,8 +578,7 @@ class CaptureService {
 			return;
 		}
 
-		$settings     = get_option( 'cartbay_settings', array() );
-		$timeout      = max( 1, absint( $settings['abandonment_timeout'] ?? 30 ) );
+		$timeout      = Settings::get_abandonment_timeout();
 		$scheduled_at = time() + ( $timeout * MINUTE_IN_SECONDS );
 
 		as_unschedule_all_actions( 'cartbay_detect_session_abandonment', array( $session_id ), 'cartbay' );

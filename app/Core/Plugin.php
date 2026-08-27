@@ -614,7 +614,7 @@ class Plugin {
 				'restored_session' => $this->has_restored_session_identity(),
 				'settings'         => array(
 					'consent_text'          => isset( $settings['consent_text'] ) ? esc_html( $settings['consent_text'] ) : '',
-					'consent_default_state' => isset( $settings['consent_default_state'] ) ? sanitize_key( $settings['consent_default_state'] ) : 'unchecked',
+					'consent_default_state' => Settings::normalize_consent_default_state( $settings['consent_default_state'] ?? 'unchecked' ),
 				),
 			)
 		);
@@ -652,7 +652,7 @@ class Plugin {
 				'restored_session' => $this->has_restored_session_identity(),
 				'settings'         => array(
 					'consent_text'          => isset( $settings['consent_text'] ) ? esc_html( $settings['consent_text'] ) : '',
-					'consent_default_state' => isset( $settings['consent_default_state'] ) ? sanitize_key( $settings['consent_default_state'] ) : 'unchecked',
+					'consent_default_state' => Settings::normalize_consent_default_state( $settings['consent_default_state'] ?? 'unchecked' ),
 				),
 			)
 		);
