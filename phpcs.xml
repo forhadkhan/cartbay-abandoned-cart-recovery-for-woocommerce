@@ -31,6 +31,6 @@
     </rule>
 
     <rule ref="PHPCompatibilityWP"/>
-    <config name="testVersion" value="8.3-"/>
+    <config name="testVersion" value="8.0-"/>
     <config name="minimum_supported_wp_version" value="6.9"/>
 </ruleset>

@@ -1046,7 +1046,7 @@ class Plugin {
 		}
 
 		// Update session status to suppressed, cancel pending emails.
-		$session->set_status( 'wc-cartbay-suppressed' );
+		$session->set_status( 'wc-cartbay-suppress' );
 		$session->save();
 
 		// Cancel pending email jobs for this session.
