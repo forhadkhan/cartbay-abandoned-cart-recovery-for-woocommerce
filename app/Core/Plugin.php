@@ -519,12 +519,25 @@ class Plugin {
 	 * @return array<string, string>
 	 */
 	private function get_order_status_labels(): array {
+		/*
+		 * wc-cartbay-expired is deliberately never assigned by CartBay: the
+		 * retention job in SessionRepository::prune_expired() deletes sessions
+		 * past the retention window rather than parking them in a terminal
+		 * status, because "retention" has to mean the data is gone. The status
+		 * stays registered as a reserved compatibility status so that any
+		 * session carrying it — from an older install or from third-party code
+		 * using the documented seams — remains a valid order that the
+		 * repository, the privacy exporter/eraser and uninstall can still read
+		 * and remove. Deregistering it would strand those rows. It is
+		 * intentionally absent from OverviewSection::get_status_labels(), so it
+		 * is not offered as an always-empty filter in CartBay's own UI.
+		 */
 		return array(
-			'wc-cartbay-captured'   => __( 'CartBay: Captured', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-abandoned'  => __( 'CartBay: Abandoned', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-recovered'  => __( 'CartBay: Recovered', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-expired'    => __( 'CartBay: Expired', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-suppressed' => __( 'CartBay: Suppressed', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-captured'  => __( 'CartBay: Captured', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-abandoned' => __( 'CartBay: Abandoned', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-recovered' => __( 'CartBay: Recovered', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-expired'   => __( 'CartBay: Expired', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-suppress'  => __( 'CartBay: Suppressed', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 		);
 	}
 
@@ -538,15 +551,15 @@ class Plugin {
 	private function get_order_status_count_labels(): array {
 		return array(
 			/* translators: %s: number of orders currently in the captured CartBay status. */
-			'wc-cartbay-captured'   => _n_noop( 'CartBay: Captured <span class="count">(%s)</span>', 'CartBay: Captured <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-captured'  => _n_noop( 'CartBay: Captured <span class="count">(%s)</span>', 'CartBay: Captured <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 			/* translators: %s: number of orders currently in the abandoned CartBay status. */
-			'wc-cartbay-abandoned'  => _n_noop( 'CartBay: Abandoned <span class="count">(%s)</span>', 'CartBay: Abandoned <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-abandoned' => _n_noop( 'CartBay: Abandoned <span class="count">(%s)</span>', 'CartBay: Abandoned <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 			/* translators: %s: number of orders currently in the recovered CartBay status. */
-			'wc-cartbay-recovered'  => _n_noop( 'CartBay: Recovered <span class="count">(%s)</span>', 'CartBay: Recovered <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-recovered' => _n_noop( 'CartBay: Recovered <span class="count">(%s)</span>', 'CartBay: Recovered <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 			/* translators: %s: number of orders currently in the expired CartBay status. */
-			'wc-cartbay-expired'    => _n_noop( 'CartBay: Expired <span class="count">(%s)</span>', 'CartBay: Expired <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-expired'   => _n_noop( 'CartBay: Expired <span class="count">(%s)</span>', 'CartBay: Expired <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 			/* translators: %s: number of orders currently in the suppressed CartBay status. */
-			'wc-cartbay-suppressed' => _n_noop( 'CartBay: Suppressed <span class="count">(%s)</span>', 'CartBay: Suppressed <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-suppress'  => _n_noop( 'CartBay: Suppressed <span class="count">(%s)</span>', 'CartBay: Suppressed <span class="count">(%s)</span>', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 		);
 	}
 

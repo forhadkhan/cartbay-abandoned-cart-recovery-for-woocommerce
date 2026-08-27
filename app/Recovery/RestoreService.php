@@ -211,7 +211,7 @@ class RestoreService {
 
 		$candidates = wc_get_orders(
 			array(
-				'status' => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppressed' ),
+				'status' => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppress' ),
 				'limit'  => 100,
 				'return' => 'objects',
 			)

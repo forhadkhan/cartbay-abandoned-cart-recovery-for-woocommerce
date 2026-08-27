@@ -99,8 +99,17 @@ function cartbay_uninstall_delete_sessions(): void {
 		'wc-cartbay-abandoned',
 		'wc-cartbay-recovered',
 		'wc-cartbay-expired',
-		'wc-cartbay-suppressed',
+		'wc-cartbay-suppress',
 	);
+
+	/*
+	 * $deleted counts orders that actually disappeared, not delete attempts. A
+	 * batch whose deletes all silently fail would otherwise re-query the same
+	 * 100 rows forever and hang plugin deletion; $iterations is a second, hard
+	 * stop for the same reason.
+	 */
+	$iterations     = 0;
+	$max_iterations = 10000;
 
 	do {
 		$sessions = wc_get_orders(
@@ -120,10 +129,17 @@ function cartbay_uninstall_delete_sessions(): void {
 				continue;
 			}
 
+			$session_id = method_exists( $session, 'get_id' ) ? absint( $session->get_id() ) : 0;
+
 			$session->delete( true );
-			++$deleted;
+
+			if ( 0 === $session_id || ! wc_get_order( $session_id ) ) {
+				++$deleted;
+			}
 		}
-	} while ( 100 === $count && $deleted > 0 );
+
+		++$iterations;
+	} while ( 100 === $count && $deleted > 0 && $iterations < $max_iterations );
 }
 
 /**
