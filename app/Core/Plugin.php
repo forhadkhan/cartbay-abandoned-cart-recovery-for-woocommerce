@@ -9,6 +9,7 @@ namespace WPAnchorBay\CartBay\Core;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WPAnchorBay\CartBay\Admin\Settings\AdminEnvironment;
+use WPAnchorBay\CartBay\Compat\CoreRecoveryEmail;
 use WPAnchorBay\CartBay\Admin\Settings\FieldRenderer;
 use WPAnchorBay\CartBay\Admin\Settings\MailEnvironmentDetector;
 use WPAnchorBay\CartBay\Admin\Settings\SettingsPage;
@@ -286,6 +287,7 @@ class Plugin {
 		add_filter( 'woocommerce_prepare_email_for_preview', array( $this, 'prepare_cartbay_email_preview' ) );
 		add_filter( 'woocommerce_email_preview_email_content_setting_ids', array( $this, 'add_email_preview_content_setting_ids' ), 10, 2 );
 		$this->container->make( RecoveryMatcher::class )->register_hooks();
+		( new CoreRecoveryEmail() )->register_hooks();
 
 		// Frontend notices.
 		add_action( 'wp', array( $this, 'display_frontend_notices' ) );
