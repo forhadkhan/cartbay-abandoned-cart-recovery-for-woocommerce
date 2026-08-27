@@ -169,10 +169,21 @@ class NotificationsSection extends AbstractSettingsSection {
 		);
 
 		if ( ! empty( $mail_status['has_delivery'] ) ) {
-			$delivery_class = 'notice-success';
-			$delivery_label = __( 'SMTP delivery detected.', 'cartbay-abandoned-cart-recovery-for-woocommerce' );
-			if ( ! empty( $mail_status['delivery']['detail'] ) ) {
-				$delivery_label .= ' ' . $mail_status['delivery']['detail'];
+			$delivery_class  = 'notice-success';
+			$delivery_source = (string) ( $mail_status['delivery']['source'] ?? '' );
+			$delivery_detail = (string) ( $mail_status['delivery']['detail'] ?? '' );
+
+			// Named plugin matches can be stated precisely; hook-based matches
+			// are inferences and are worded as such. Never surface the raw
+			// callback here — it belongs in the diagnostics table below.
+			if ( in_array( $delivery_source, array( 'known_plugin', 'plugin_metadata' ), true ) && '' !== $delivery_detail ) {
+				$delivery_label = sprintf(
+					/* translators: %s: name of the detected mail delivery plugin. */
+					__( 'SMTP delivery detected: %s.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+					$delivery_detail
+				);
+			} else {
+				$delivery_label = __( 'A mail delivery plugin appears to be handling delivery.', 'cartbay-abandoned-cart-recovery-for-woocommerce' );
 			}
 		} elseif ( ! empty( $mail_status['has_logger'] ) ) {
 			$delivery_label = __( 'Email logging detected, but no SMTP delivery service. Emails to buyers may not be delivered reliably.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ) . $learn_more_link;
@@ -203,6 +214,12 @@ class NotificationsSection extends AbstractSettingsSection {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Delivery service', 'cartbay-abandoned-cart-recovery-for-woocommerce' ); ?></th>
 						<td><?php echo esc_html( $mail_status['delivery']['detail'] ); ?></td>
+					</tr>
+					<?php endif; ?>
+					<?php if ( ! empty( $mail_status['delivery']['debug'] ) ) : ?>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Detected via', 'cartbay-abandoned-cart-recovery-for-woocommerce' ); ?></th>
+						<td><code><?php echo esc_html( $mail_status['delivery']['debug'] ); ?></code></td>
 					</tr>
 					<?php endif; ?>
 				</tbody>
