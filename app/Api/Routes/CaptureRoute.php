@@ -87,9 +87,19 @@ class CaptureRoute {
 						'required' => true,
 						'type'     => 'boolean',
 					),
+
+					/*
+					 * Advisory only. Cart items and totals are always read from
+					 * the shopper's server-side WooCommerce cart, never from
+					 * this payload — trusting a client-supplied total would let
+					 * anyone post an arbitrary cart value and poison recovery
+					 * analytics. Kept as an optional parameter for existing
+					 * clients and used solely as a display fallback.
+					 */
 					'cart'          => array(
-						'required' => true,
+						'required' => false,
 						'type'     => 'object',
+						'default'  => array(),
 					),
 					'source'        => array(
 						'required' => true,
