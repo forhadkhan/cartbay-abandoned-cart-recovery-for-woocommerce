@@ -14,7 +14,7 @@ Recover WooCommerce abandoned carts with a focused, consent-based 3-email recove
 
 == Description ==
 
-[Product Page](https://wpanchorbay.com/plugins/cartbay/) | [Documentation](https://docs.wpanchorbay.com/cartbay/) | [Support](https://wordpress.org/support/plugin/cartbay-abandoned-cart-recovery-for-woocommerce/)
+[Product Page](https://wpanchorbay.com/plugins/cartbay-abandoned-cart-recovery-for-woocommerce/) | [Documentation](https://docs.wpanchorbay.com/cartbay/) | [Support](https://wordpress.org/support/plugin/cartbay-abandoned-cart-recovery-for-woocommerce/)
 
 Every abandoned cart is a shopper who already wanted to buy. **CartBay** brings them back with a simple, focused abandoned cart recovery workflow for WooCommerce: it captures consented checkout emails, detects when a cart goes quiet, and sends a configured 3-step recovery email sequence through your existing WooCommerce email setup.
 
@@ -74,7 +74,7 @@ Everything above is included in the free plugin. **CartBay Pro** is an optional 
 * **Licensed automatic updates** delivered outside WordPress.org and tied to your license key
 * **License management** in Settings and the setup wizard, plus a REST API for programmatic activation
 
-*On the roadmap for Pro:* a visual drag-and-drop email builder, and more. Learn more at https://wpanchorbay.com/plugins/cartbay/.
+*On the roadmap for Pro:* a visual drag-and-drop email builder, and more. Learn more at https://wpanchorbay.com/plugins/cartbay-abandoned-cart-recovery-for-woocommerce/.
 
 = Open source and privacy-friendly =
 
