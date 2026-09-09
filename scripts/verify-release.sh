@@ -38,6 +38,13 @@ REQUIRED=(
     "languages/cartbay-abandoned-cart-recovery-for-woocommerce.pot"
 )
 
+# JS build source shipped for GPL source-availability compliance (see release.js).
+REQUIRED+=(
+    "src"
+    "package.json"
+    "webpack.config.js"
+)
+
 for f in "${REQUIRED[@]}"; do
     if [ ! -e "$PLUGIN/$f" ]; then
         echo "❌ MISSING required file: $f"
@@ -48,7 +55,6 @@ done
 
 # Forbidden files/dirs.
 FORBIDDEN=(
-    "src"
     "node_modules"
     "AGENTS.md"
     "GEMINI.md"
@@ -56,8 +62,6 @@ FORBIDDEN=(
     "phpcs.xml"
     "phpstan.neon"
     "phpunit.xml"
-    "webpack.config.js"
-    "package.json"
     "scripts"
     ".git"
     ".env"
@@ -79,16 +83,30 @@ for f in "${FORBIDDEN[@]}"; do
     echo "✅ Absent (correct): $f"
 done
 
-# Check plugin header version matches CARTBAY_VERSION constant.
-HEADER_VERSION=$(grep "Version:" "$PLUGIN/cartbay-abandoned-cart-recovery-for-woocommerce.php" | head -1 | awk '{print $NF}' | tr -d '[:space:]')
-CONST_VERSION=$(grep "define.*CARTBAY_VERSION" "$PLUGIN/app/Core/Constants.php" | grep -o "'[0-9.]*'" | tr -d "'")
+# Version parity across every place the version is written. package.json drives
+# the JS source-link banner and CARTBAY_VERSION gates the upgrade migrations;
+# both have been missed before and nothing else in the pipeline catches them.
+HEADER_VERSION=$(grep -m1 -oP '^\s*\*\s*Version:\s*\K[0-9A-Za-z.\-]+' "$PLUGIN/cartbay-abandoned-cart-recovery-for-woocommerce.php" || true)
+HEADER_STABLE=$(grep -m1 -oP '^\s*\*\s*Stable tag:\s*\K[0-9A-Za-z.\-]+' "$PLUGIN/cartbay-abandoned-cart-recovery-for-woocommerce.php" || true)
+README_STABLE=$(grep -m1 -oP '^Stable tag:\s*\K[0-9A-Za-z.\-]+' "$PLUGIN/readme.txt" || true)
+PKG_VERSION=$(grep -m1 -oP '"version"\s*:\s*"\K[0-9A-Za-z.\-]+' "$PLUGIN/package.json" || true)
+CONST_VERSION=$(grep -m1 -oP "CARTBAY_VERSION',\s*'\K[0-9A-Za-z.\-]+" "$PLUGIN/app/Core/Constants.php" || true)
 
-if [ "$HEADER_VERSION" != "$CONST_VERSION" ]; then
-    echo "❌ Version mismatch: header=$HEADER_VERSION constant=$CONST_VERSION"
+if [ -z "$HEADER_VERSION" ]; then
+    echo "❌ Could not read Version from the plugin header"
     exit 1
 fi
-echo "✅ Version consistent: $HEADER_VERSION"
+
+for pair in "header Stable tag=$HEADER_STABLE" "readme.txt Stable tag=$README_STABLE" "package.json version=$PKG_VERSION" "CARTBAY_VERSION constant=$CONST_VERSION"; do
+    label="${pair%%=*}"
+    value="${pair##*=}"
+    if [ "$value" != "$HEADER_VERSION" ]; then
+        echo "❌ VERSION MISMATCH: $label is '$value', plugin header Version is '$HEADER_VERSION'"
+        exit 1
+    fi
+    echo "✅ $label matches $HEADER_VERSION"
+done
 
 rm -rf "$TMP"
 echo ""
-echo "✅ Release verification passed."
+echo "✅ Release verification passed for $HEADER_VERSION."

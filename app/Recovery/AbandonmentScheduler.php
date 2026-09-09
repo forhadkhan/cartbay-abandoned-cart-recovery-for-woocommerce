@@ -9,6 +9,7 @@ namespace WPAnchorBay\CartBay\Recovery;
 
 use WC_Order;
 use WPAnchorBay\CartBay\Analytics\AnalyticsService;
+use WPAnchorBay\CartBay\Core\Settings;
 use WPAnchorBay\CartBay\Data\SessionRepository;
 use WPAnchorBay\CartBay\Utils\Logger;
 
@@ -60,8 +61,7 @@ class AbandonmentScheduler {
 	 * @return void
 	 */
 	public function run(): void {
-		$settings = get_option( 'cartbay_settings', array() );
-		$timeout  = absint( $settings['abandonment_timeout'] ?? 30 );
+		$timeout = Settings::get_abandonment_timeout();
 
 		$inactive = $this->sessions->get_inactive_captured( $timeout );
 
@@ -86,8 +86,7 @@ class AbandonmentScheduler {
 			return;
 		}
 
-		$settings         = get_option( 'cartbay_settings', array() );
-		$timeout_seconds  = absint( $settings['abandonment_timeout'] ?? 30 ) * MINUTE_IN_SECONDS;
+		$timeout_seconds  = Settings::get_abandonment_timeout() * MINUTE_IN_SECONDS;
 		$last_activity_at = absint( $session->get_meta( '_cartbay_last_activity_at', true ) );
 		if ( 0 === $last_activity_at ) {
 			$created_at       = $session->get_date_created();

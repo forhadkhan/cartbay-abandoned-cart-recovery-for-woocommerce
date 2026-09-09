@@ -89,7 +89,7 @@ class SessionRepository {
 			return false;
 		}
 
-		if ( ! in_array( $order->get_status(), array( 'cartbay-captured', 'cartbay-abandoned', 'cartbay-recovered', 'cartbay-expired', 'cartbay-suppressed' ), true ) ) {
+		if ( ! in_array( $order->get_status(), array( 'cartbay-captured', 'cartbay-abandoned', 'cartbay-recovered', 'cartbay-expired', 'cartbay-suppress' ), true ) ) {
 			return false;
 		}
 
@@ -251,7 +251,7 @@ class SessionRepository {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- WC CRUD lookup by legacy CartBay session ID meta.
 		$orders = $this->query_orders(
 			array(
-				'status'     => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppressed' ),
+				'status'     => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppress' ),
 				'meta_key'   => '_cartbay_session_id',
 				'meta_value' => absint( $session_id ),
 				'limit'      => 1,
@@ -280,7 +280,7 @@ class SessionRepository {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- WC CRUD lookup by CartBay-owned restore token hash.
 		$orders = $this->query_orders(
 			array(
-				'status'     => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppressed' ),
+				'status'     => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppress' ),
 				'meta_key'   => '_cartbay_token_hash',
 				'meta_value' => $token_hash,
 				'limit'      => 1,
@@ -310,7 +310,7 @@ class SessionRepository {
 
 		return $this->query_orders(
 			array(
-				'status'       => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-suppressed' ),
+				'status'       => array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-suppress' ),
 				'date_created' => '<' . $threshold,
 				'limit'        => absint( $limit ),
 			)

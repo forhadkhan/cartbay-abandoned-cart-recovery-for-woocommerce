@@ -20,7 +20,7 @@ class MailEnvironmentDetector {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array{has_delivery: bool, has_logger: bool, delivery: array{source: string, detail: string, confidence: string}, logger: array{source: string, detail: string, confidence: string}} Mail environment status.
+	 * @return array{has_delivery: bool, has_logger: bool, delivery: array{source: string, detail: string, debug: string, confidence: string}, logger: array{source: string, detail: string, confidence: string}} Mail environment status.
 	 */
 	public function detect(): array {
 		$status = array(
@@ -29,6 +29,7 @@ class MailEnvironmentDetector {
 			'delivery'     => array(
 				'source'     => '',
 				'detail'     => '',
+				'debug'      => '',
 				'confidence' => '',
 			),
 			'logger'       => array(
@@ -45,7 +46,7 @@ class MailEnvironmentDetector {
 
 		if ( ! empty( $delivery ) ) {
 			$status['has_delivery'] = true;
-			$status['delivery']     = $delivery;
+			$status['delivery']     = array_merge( $status['delivery'], $delivery );
 		}
 
 		if ( ! empty( $logger ) ) {
@@ -71,7 +72,7 @@ class MailEnvironmentDetector {
 	 * @param array<int, string>          $active_plugins Active plugin basenames.
 	 * @param array<string, array<mixed>> $plugin_data    Plugin metadata keyed by basename.
 	 *
-	 * @return array{source: string, detail: string, confidence: string}|array{} Delivery result.
+	 * @return array{source: string, detail: string, debug: string, confidence: string}|array{} Delivery result.
 	 */
 	private function detect_delivery( array $active_plugins, array $plugin_data ): array {
 		$known_plugins = $this->get_delivery_plugins();
@@ -81,6 +82,7 @@ class MailEnvironmentDetector {
 				return array(
 					'source'     => 'known_plugin',
 					'detail'     => $name,
+					'debug'      => '',
 					'confidence' => 'high',
 				);
 			}
@@ -91,31 +93,39 @@ class MailEnvironmentDetector {
 			return $metadata_match;
 		}
 
-		$phpmailer_callback = $this->first_hook_callback( 'phpmailer_init' );
-		if ( '' !== $phpmailer_callback ) {
-			return array(
-				'source'     => 'phpmailer_init_hook',
-				'detail'     => $phpmailer_callback,
-				'confidence' => 'medium',
-			);
-		}
+		/*
+		 * Hook-based detection is a fallback for delivery plugins we do not know
+		 * by basename. It is deliberately conservative: WordPress and
+		 * WooCommerce core both register their own callbacks on these hooks
+		 * (WooCommerce attaches WC_Email::handle_multipart to phpmailer_init on
+		 * every store), so the mere presence of a callback proves nothing. A
+		 * callback only counts as delivery when it is not a core callback AND
+		 * its name names a delivery service. Every registered callback is
+		 * examined, not just the first, because core's usually is first.
+		 */
+		$hook_confidence = array(
+			'phpmailer_init' => 'medium',
+			'pre_wp_mail'    => 'medium',
+			'wp_mail'        => 'low',
+		);
 
-		$pre_mail_callback = $this->first_hook_callback( 'pre_wp_mail' );
-		if ( '' !== $pre_mail_callback ) {
-			return array(
-				'source'     => 'pre_wp_mail_hook',
-				'detail'     => $pre_mail_callback,
-				'confidence' => 'medium',
-			);
-		}
+		foreach ( $hook_confidence as $hook => $confidence ) {
+			foreach ( $this->hook_callbacks( $hook ) as $callback ) {
+				if ( $this->is_core_callback( $callback ) ) {
+					continue;
+				}
 
-		$wp_mail_callback = $this->first_hook_callback( 'wp_mail' );
-		if ( '' !== $wp_mail_callback && $this->contains_delivery_keyword( $wp_mail_callback ) ) {
-			return array(
-				'source'     => 'wp_mail_hook',
-				'detail'     => $wp_mail_callback,
-				'confidence' => 'low',
-			);
+				if ( ! $this->contains_delivery_keyword( $callback ) ) {
+					continue;
+				}
+
+				return array(
+					'source'     => $hook . '_hook',
+					'detail'     => __( 'A mail delivery plugin is handling delivery.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+					'debug'      => $callback,
+					'confidence' => $confidence,
+				);
+			}
 		}
 
 		return array();
@@ -227,7 +237,7 @@ class MailEnvironmentDetector {
 	 * @param array<int, string>          $active_plugins Active plugin basenames.
 	 * @param array<string, array<mixed>> $plugin_data    Plugin metadata keyed by basename.
 	 *
-	 * @return array{source: string, detail: string, confidence: string}|array{} Delivery result.
+	 * @return array{source: string, detail: string, debug: string, confidence: string}|array{} Delivery result.
 	 */
 	private function detect_delivery_from_metadata( array $active_plugins, array $plugin_data ): array {
 		foreach ( $active_plugins as $plugin ) {
@@ -241,6 +251,7 @@ class MailEnvironmentDetector {
 				return array(
 					'source'     => 'plugin_metadata',
 					'detail'     => $this->plugin_name( $plugin, $plugin_data ),
+					'debug'      => '',
 					'confidence' => 'medium',
 				);
 			}
@@ -400,24 +411,30 @@ class MailEnvironmentDetector {
 	}
 
 	/**
-	 * Return the first callback description for a hook without executing it.
+	 * Return every callback description registered on a hook, without executing it.
 	 *
-	 * @since 1.0.0
+	 * Reads $wp_filter directly so detection never fires the hook. Callers must
+	 * filter the result — a registered callback is not by itself evidence of
+	 * anything, since WordPress and WooCommerce core register their own.
+	 *
+	 * @since 1.1.1
 	 *
 	 * @param string $hook Hook name.
 	 *
-	 * @return string Callback description, or empty string when no callback is registered.
+	 * @return array<int, string> Callback descriptions, in registration order.
 	 */
-	private function first_hook_callback( string $hook ): string {
-		if ( empty( $GLOBALS['wp_filter'][ $hook ] ) || ! is_object( $GLOBALS['wp_filter'][ $hook ] ) ) {
-			return '';
+	private function hook_callbacks( string $hook ): array {
+		if ( ! isset( $GLOBALS['wp_filter'][ $hook ] ) ) {
+			return array();
 		}
 
 		$callbacks = $GLOBALS['wp_filter'][ $hook ]->callbacks ?? array();
 
 		if ( ! is_array( $callbacks ) ) {
-			return '';
+			return array();
 		}
+
+		$descriptions = array();
 
 		foreach ( $callbacks as $priority_callbacks ) {
 			if ( ! is_array( $priority_callbacks ) ) {
@@ -429,11 +446,60 @@ class MailEnvironmentDetector {
 					continue;
 				}
 
-				return $this->callback_to_string( $callback['function'] );
+				$description = $this->callback_to_string( $callback['function'] );
+
+				if ( '' !== $description ) {
+					$descriptions[] = $description;
+				}
 			}
 		}
 
-		return '';
+		return $descriptions;
+	}
+
+	/**
+	 * Determine whether a callback description belongs to WordPress or WooCommerce core.
+	 *
+	 * Core callbacks on the mail hooks are routine and say nothing about how a
+	 * site delivers email. WooCommerce in particular attaches
+	 * WC_Email::handle_multipart to phpmailer_init on every store, which would
+	 * otherwise read as "SMTP delivery detected" on a store that has no SMTP
+	 * plugin at all.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @param string $callback Callback description.
+	 *
+	 * @return bool True when the callback is a core callback.
+	 */
+	private function is_core_callback( string $callback ): bool {
+		$normalized = strtolower( $callback );
+
+		/*
+		 * Deliberately narrow. A broad 'wp_' prefix would swallow genuine
+		 * delivery plugins (wp_mail_smtp_*, wp-ses), so core is excluded by the
+		 * prefixes that cannot belong to a delivery plugin, plus the specific
+		 * core callbacks known to sit on these hooks.
+		 */
+		$prefixes = array(
+			'wc_',
+			'woocommerce',
+			'automattic\\woocommerce',
+		);
+
+		foreach ( $prefixes as $prefix ) {
+			if ( str_starts_with( $normalized, $prefix ) ) {
+				return true;
+			}
+		}
+
+		$core_callbacks = array(
+			'wp_staticize_emoji_for_email',
+			'wp_mail_succeeded',
+			'wp_mail_failed',
+		);
+
+		return in_array( $normalized, $core_callbacks, true );
 	}
 
 	/**

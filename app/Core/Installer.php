@@ -60,6 +60,9 @@ class Installer {
 		self::maybe_upgrade_test_mode_setting();
 		self::maybe_upgrade_remove_data_on_uninstall_setting();
 		self::maybe_upgrade_log_enabled_setting();
+		self::maybe_upgrade_consent_default_state();
+		self::maybe_upgrade_abandonment_timeout();
+		self::maybe_upgrade_truncated_suppressed_status();
 
 		if ( '' !== $code_version ) {
 			update_option( 'cartbay_db_version', $code_version, false );
@@ -456,6 +459,122 @@ class Installer {
 			$settings['log_enabled'] = $settings['log_enabled'] ? 'yes' : 'no';
 			update_option( 'cartbay_settings', $settings );
 		}
+	}
+
+	/**
+	 * Move sessions off the truncated suppressed status.
+	 *
+	 * The status was 'wc-cartbay-suppressed' before 1.1.1 — 21 characters,
+	 * against an order status column that is varchar(20). MySQL silently
+	 * truncated every write to 'wc-cartbay-suppresse', so no query using the
+	 * name in the code ever matched: the Suppressed filter and its count were
+	 * permanently empty, and uninstall left those sessions behind because its
+	 * delete list used the untruncated name too. The status is now
+	 * 'wc-cartbay-suppress' (19 characters) and existing rows are moved onto it.
+	 *
+	 * Sessions are moved through the order CRUD rather than with direct SQL so
+	 * the change is correct under both HPOS and legacy post storage, and so
+	 * order caches are invalidated.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @return void
+	 */
+	private static function maybe_upgrade_truncated_suppressed_status(): void {
+		if ( ! function_exists( 'wc_get_orders' ) ) {
+			return;
+		}
+
+		$legacy_statuses = array( 'wc-cartbay-suppresse', 'wc-cartbay-suppressed' );
+		$iterations      = 0;
+
+		do {
+			$sessions = wc_get_orders(
+				array(
+					'status'  => $legacy_statuses,
+					'limit'   => 100,
+					'orderby' => 'ID',
+					'order'   => 'ASC',
+					'return'  => 'objects',
+				)
+			);
+
+			if ( ! is_array( $sessions ) || array() === $sessions ) {
+				return;
+			}
+
+			$fetched = count( $sessions );
+
+			foreach ( $sessions as $session ) {
+				if ( ! $session instanceof \WC_Order ) {
+					continue;
+				}
+
+				$session->set_status( 'wc-cartbay-suppress' );
+				$session->save();
+			}
+
+			++$iterations;
+		} while ( 100 === $fetched && $iterations < 1000 );
+	}
+
+	/**
+	 * Normalize an out-of-range consent default state.
+	 *
+	 * Before 1.1.1 the Block Checkout default was derived with an
+	 * "is not 'unchecked'" test, so any value outside {checked, unchecked} —
+	 * an empty string, a stale option, a third-party write — pre-ticked the
+	 * consent box. A pre-ticked box is not valid consent under the GDPR, so any
+	 * such value is corrected here.
+	 *
+	 * A deliberate 'checked' is a merchant decision and is left alone.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @return void
+	 */
+	private static function maybe_upgrade_consent_default_state(): void {
+		$settings = get_option( 'cartbay_settings', array() );
+
+		if ( ! is_array( $settings ) || ! array_key_exists( 'consent_default_state', $settings ) ) {
+			return;
+		}
+
+		if ( in_array( $settings['consent_default_state'], array( 'checked', 'unchecked' ), true ) ) {
+			return;
+		}
+
+		$settings['consent_default_state'] = 'unchecked';
+		update_option( 'cartbay_settings', $settings );
+	}
+
+	/**
+	 * Bring a stored abandonment timeout back inside the supported range.
+	 *
+	 * The 5-1440 minute range was previously enforced only by an HTML attribute,
+	 * so values saved through the wizard, WP-CLI or update_option() could fall
+	 * outside it. A stored 0 made the scheduler treat every cart as abandoned
+	 * immediately.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @return void
+	 */
+	private static function maybe_upgrade_abandonment_timeout(): void {
+		$settings = get_option( 'cartbay_settings', array() );
+
+		if ( ! is_array( $settings ) || ! array_key_exists( 'abandonment_timeout', $settings ) ) {
+			return;
+		}
+
+		$clamped = Settings::clamp_abandonment_timeout( $settings['abandonment_timeout'] );
+
+		if ( (string) $settings['abandonment_timeout'] === (string) $clamped ) {
+			return;
+		}
+
+		$settings['abandonment_timeout'] = $clamped;
+		update_option( 'cartbay_settings', $settings );
 	}
 
 	/**

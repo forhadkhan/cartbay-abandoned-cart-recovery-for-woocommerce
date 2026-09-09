@@ -19,6 +19,15 @@ defined( 'ABSPATH' ) || exit;
  */
 class OverviewSection extends AbstractSettingsSection {
 	/**
+	 * Maximum session orders hydrated for the sessions table in one request.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @var int
+	 */
+	private const MAX_SESSIONS_SCANNED = 1000;
+
+	/**
 	 * Analytics service.
 	 *
 	 * @since 1.0.0
@@ -239,8 +248,15 @@ class OverviewSection extends AbstractSettingsSection {
 		$search_query  = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		$per_page       = 20;
-		$valid_statuses = array( 'captured', 'abandoned', 'recovered', 'suppressed' );
+		$per_page = 20;
+
+		// Derived from the label map, which is also what builds the filter
+		// dropdown, so the accepted values and the offered values cannot drift
+		// apart when a status slug changes.
+		$valid_statuses = array_map(
+			static fn ( string $slug ): string => str_replace( 'wc-cartbay-', '', $slug ),
+			array_keys( $this->get_status_labels() )
+		);
 		$valid_orderby  = array( 'session_id', 'cart_total', 'created', 'last_activity', 'emails_sent' );
 		$query_status   = in_array( $status_filter, $valid_statuses, true ) ? 'wc-cartbay-' . $status_filter : '';
 
@@ -248,15 +264,36 @@ class OverviewSection extends AbstractSettingsSection {
 		$order   = in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'DESC';
 		$since   = gmdate( 'Y-m-d H:i:s', time() - ( $period * DAY_IN_SECONDS ) );
 
-		$args         = array(
-			'status'       => '' !== $query_status ? $query_status : array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered', 'wc-cartbay-suppressed' ),
+		/*
+		 * Bounded fetch. Sorting by cart total, last activity or emails sent, and
+		 * the email/ID search, are applied in PHP below, so the rows have to be
+		 * in memory. Before 1.1.1 this used limit => -1, which loaded every
+		 * session in the period and exhausted memory once a store accumulated
+		 * real volume. The newest MAX_SESSIONS_SCANNED are loaded instead, and
+		 * the merchant is told when the list has been bounded rather than being
+		 * shown a silently short list.
+		 */
+		$args = array(
+			'status'       => '' !== $query_status ? $query_status : array_keys( $this->get_status_labels() ),
 			'date_created' => '>=' . $since,
-			'limit'        => -1,
+			'limit'        => self::MAX_SESSIONS_SCANNED,
+			'page'         => 1,
 			'orderby'      => 'date',
 			'order'        => 'DESC',
 			'return'       => 'objects',
+			'paginate'     => true,
 		);
-		$all_sessions = function_exists( 'wc_get_orders' ) ? wc_get_orders( $args ) : array();
+
+		$all_sessions  = array();
+		$matched_total = 0;
+		$results       = function_exists( 'wc_get_orders' ) ? wc_get_orders( $args ) : null;
+
+		if ( is_object( $results ) ) {
+			$all_sessions  = is_array( $results->orders ?? null ) ? $results->orders : array();
+			$matched_total = absint( $results->total ?? 0 );
+		}
+
+		$scan_truncated = $matched_total > self::MAX_SESSIONS_SCANNED;
 
 		if ( '' !== $search_query ) {
 			$all_sessions = array_filter(
@@ -351,6 +388,20 @@ class OverviewSection extends AbstractSettingsSection {
 		echo '<h3>' . esc_html__( 'Sessions', 'cartbay-abandoned-cart-recovery-for-woocommerce' ) . '</h3>';
 
 		echo '<div class="cartbay-session-filters">';
+		if ( $scan_truncated ) {
+			printf(
+				'<div class="notice notice-warning inline"><p>%s</p></div>',
+				esc_html(
+					sprintf(
+						/* translators: 1: number of sessions shown, 2: total number of sessions matching the filter. */
+						__( 'Showing the %1$d most recent sessions of %2$d that match this filter. Narrow the period, status or search to see the rest.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+						self::MAX_SESSIONS_SCANNED,
+						$matched_total
+					)
+				)
+			);
+		}
+
 		echo '<div class="tablenav top"><div class="alignleft actions">';
 		echo '<label class="screen-reader-text" for="cartbay-session-status-filter">' . esc_html__( 'Filter by session status', 'cartbay-abandoned-cart-recovery-for-woocommerce' ) . '</label>';
 		echo '<select name="status" id="cartbay-session-status-filter">';
@@ -471,10 +522,10 @@ class OverviewSection extends AbstractSettingsSection {
 	 */
 	private function get_status_labels(): array {
 		return array(
-			'wc-cartbay-captured'   => __( 'Captured', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-abandoned'  => __( 'Abandoned', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-recovered'  => __( 'Recovered', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-suppressed' => __( 'Suppressed', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-captured'  => __( 'Captured', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-abandoned' => __( 'Abandoned', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-recovered' => __( 'Recovered', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-suppress'  => __( 'Suppressed', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 		);
 	}
 
@@ -487,10 +538,10 @@ class OverviewSection extends AbstractSettingsSection {
 	 */
 	private function get_status_descriptions(): array {
 		return array(
-			'wc-cartbay-captured'   => __( 'Shopper email and cart data were captured and the cart is still inside the abandonment timeout.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-abandoned'  => __( 'The cart passed the inactivity timeout and is eligible for recovery emails.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-recovered'  => __( 'A later WooCommerce order matched this CartBay session.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-			'wc-cartbay-suppressed' => __( 'The shopper or email is excluded from recovery messaging.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-captured'  => __( 'Shopper email and cart data were captured and the cart is still inside the abandonment timeout.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-abandoned' => __( 'The cart passed the inactivity timeout and is eligible for recovery emails.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-recovered' => __( 'A later WooCommerce order matched this CartBay session.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+			'wc-cartbay-suppress'  => __( 'The shopper or email is excluded from recovery messaging.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 		);
 	}
 
@@ -506,17 +557,15 @@ class OverviewSection extends AbstractSettingsSection {
 	private function get_status_counts( array $statuses ): array {
 		$counts = array();
 
+		/*
+		 * wc_orders_count() answers from WooCommerce's own per-type status count
+		 * cache and falls back to a single grouped COUNT query. Before 1.1.1 this
+		 * ran one unbounded wc_get_orders() per status on every page load, which
+		 * fetched every session ID in the store five times over.
+		 */
 		foreach ( $statuses as $status_slug ) {
-			$counts[ $status_slug ] = function_exists( 'wc_get_orders' )
-				? count(
-					wc_get_orders(
-						array(
-							'status' => $status_slug,
-							'limit'  => -1,
-							'return' => 'ids',
-						)
-					)
-				)
+			$counts[ $status_slug ] = function_exists( 'wc_orders_count' )
+				? absint( wc_orders_count( $status_slug, 'shop_order' ) )
 				: 0;
 		}
 

@@ -415,11 +415,15 @@ if ( ! function_exists( 'wc_get_orders' ) ) {
 	/**
 	 * Fetch WooCommerce orders.
 	 *
+	 * Returns a plain list of orders (or IDs) normally, but an object carrying
+	 * orders/total/max_num_pages when 'paginate' => true is passed. The stub
+	 * mirrors both so callers that paginate type-check correctly.
+	 *
 	 * @param array<string, mixed> $args Query arguments.
 	 *
-	 * @return array<int, WC_Order>
+	 * @return array<int, WC_Order|int>|object
 	 */
-	function wc_get_orders( array $args ): array {
+	function wc_get_orders( array $args ): array|object {
 		return array();
 	}
 }
@@ -1346,5 +1350,19 @@ if ( ! class_exists( 'WC_Mailer' ) ) {
 		public function get_emails(): array {
 			return array();
 		}
+	}
+}
+
+if ( ! function_exists( 'wc_orders_count' ) ) {
+	/**
+	 * Count orders in a given status.
+	 *
+	 * @param string $status Order status, with or without the wc- prefix.
+	 * @param string $type   Optional order type.
+	 *
+	 * @return int
+	 */
+	function wc_orders_count( string $status, string $type = '' ): int {
+		return 0;
 	}
 }

@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: CartBay - Abandoned Cart Recovery for WooCommerce 1.1.0\n"
+"Project-Id-Version: CartBay - Abandoned Cart Recovery for WooCommerce 1.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/cartbay-abandoned-cart-recovery-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-23T19:24:54+00:00\n"
+"POT-Creation-Date: 2026-09-09T13:09:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: cartbay-abandoned-cart-recovery-for-woocommerce\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: cartbay-abandoned-cart-recovery-for-woocommerce.php
-msgid "https://wpanchorbay.com/plugins/cartbay/"
+msgid "https://wpanchorbay.com/plugins/cartbay-abandoned-cart-recovery-for-woocommerce/"
 msgstr ""
 
 #. Description of the plugin
@@ -39,81 +39,89 @@ msgstr ""
 msgid "https://wpanchorbay.com/"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:37
+#: app/Admin/Settings/CaptureSection.php:39
 msgid "Capture"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:50
+#: app/Admin/Settings/CaptureSection.php:52
 msgid "Capture Settings"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:52
+#: app/Admin/Settings/CaptureSection.php:54
 msgid "Configure how CartBay captures email and cart data at checkout."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:56
+#: app/Admin/Settings/CaptureSection.php:58
 msgid "Enable Capture"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:57
+#: app/Admin/Settings/CaptureSection.php:59
 msgid "Capture email and cart data at checkout"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:58
+#: app/Admin/Settings/CaptureSection.php:60
 msgid "Turns guest cart capture on for both classic checkout and WooCommerce Blocks checkout."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:59
+#: app/Admin/Settings/CaptureSection.php:61
 msgid "When enabled, CartBay loads the checkout capture scripts and accepts consented capture requests. Turn this off to pause new cart and email capture without deleting existing sessions."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:65
-#: app/Admin/Wizard/WizardController.php:225
+#: app/Admin/Settings/CaptureSection.php:67
+#: app/Admin/Wizard/WizardController.php:226
 msgid "Consent Text"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:66
+#: app/Admin/Settings/CaptureSection.php:68
 msgid "Text shown next to the consent checkbox on checkout."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:67
+#: app/Admin/Settings/CaptureSection.php:69
 msgid "Keep this short and explicit so shoppers understand you may email them about an unfinished checkout."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:74
-#: app/Admin/Wizard/WizardController.php:234
+#: app/Admin/Settings/CaptureSection.php:76
+#: app/Admin/Wizard/WizardController.php:235
 msgid "Consent Checkbox Default State"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:75
+#: app/Admin/Settings/CaptureSection.php:77
 msgid "Choose whether the checkout consent checkbox starts checked or unchecked."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:76
+#: app/Admin/Settings/CaptureSection.php:78
 msgid "Defaults to unchecked so consent is an explicit opt-in (recommended for GDPR and similar laws). Shoppers can change it at checkout; CartBay only captures while it is checked."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:81
-#: app/Admin/Wizard/WizardController.php:240
+#: app/Admin/Settings/CaptureSection.php:83
+#: app/Admin/Wizard/WizardController.php:241
 msgid "Unchecked (recommended)"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:82
-#: app/Admin/Wizard/WizardController.php:241
+#: app/Admin/Settings/CaptureSection.php:84
+#: app/Admin/Wizard/WizardController.php:242
 msgid "Checked"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:86
-#: app/Admin/Wizard/WizardController.php:248
+#: app/Admin/Settings/CaptureSection.php:88
+#: app/Admin/Wizard/WizardController.php:249
 msgid "Abandonment Timeout (minutes)"
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:87
-msgid "Minutes of inactivity before a cart is marked as abandoned."
+#. translators: 1: minimum minutes, 2: maximum minutes.
+#: app/Admin/Settings/CaptureSection.php:91
+#, php-format
+msgid "Minutes of inactivity before a cart is marked as abandoned. Accepts %1$d to %2$d minutes."
 msgstr ""
 
-#: app/Admin/Settings/CaptureSection.php:88
+#: app/Admin/Settings/CaptureSection.php:95
 msgid "CartBay waits this long after the shopper stops interacting before the recovery sequence becomes eligible."
+msgstr ""
+
+#. translators: 1: minimum minutes, 2: maximum minutes, 3: value that was saved instead.
+#: app/Admin/Settings/CaptureSection.php:138
+#, php-format
+msgid "Abandonment Timeout must be between %1$d and %2$d minutes. It has been saved as %3$d."
 msgstr ""
 
 #: app/Admin/Settings/LogsSection.php:59
@@ -169,7 +177,7 @@ msgid "All levels"
 msgstr ""
 
 #: app/Admin/Settings/LogsSection.php:194
-#: app/Admin/Settings/OverviewSection.php:363
+#: app/Admin/Settings/OverviewSection.php:414
 msgid "Filter"
 msgstr ""
 
@@ -240,7 +248,7 @@ msgstr ""
 
 #. translators: 1: current page, 2: total pages
 #: app/Admin/Settings/LogsSection.php:294
-#: app/Admin/Settings/OverviewSection.php:557
+#: app/Admin/Settings/OverviewSection.php:606
 #, php-format
 msgid "%1$d of %2$d"
 msgstr ""
@@ -257,7 +265,11 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: app/Admin/Settings/MailEnvironmentDetector.php:467
+#: app/Admin/Settings/MailEnvironmentDetector.php:124
+msgid "A mail delivery plugin is handling delivery."
+msgstr ""
+
+#: app/Admin/Settings/MailEnvironmentDetector.php:533
 msgid "unknown callback"
 msgstr ""
 
@@ -276,126 +288,137 @@ msgstr ""
 
 #: app/Admin/Settings/NotificationsSection.php:168
 #: app/Admin/Settings/SettingsPage.php:825
-#: app/Admin/Wizard/WizardController.php:329
-#: app/Admin/Wizard/WizardController.php:337
+#: app/Admin/Wizard/WizardController.php:349
+#: app/Admin/Wizard/WizardController.php:357
 msgid "Learn how to set up reliable email delivery"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:173
-msgid "SMTP delivery detected."
-msgstr ""
-
-#: app/Admin/Settings/NotificationsSection.php:178
-msgid "Email logging detected, but no SMTP delivery service. Emails to buyers may not be delivered reliably."
-msgstr ""
-
-#: app/Admin/Settings/NotificationsSection.php:180
-msgid "No SMTP plugin detected. Without an SMTP service, recovery emails may land in spam."
-msgstr ""
-
-#: app/Admin/Settings/NotificationsSection.php:184
-msgid "Email Delivery Test"
+#. translators: %s: name of the detected mail delivery plugin.
+#: app/Admin/Settings/NotificationsSection.php:182
+#, php-format
+msgid "SMTP delivery detected: %s."
 msgstr ""
 
 #: app/Admin/Settings/NotificationsSection.php:186
-#: app/Admin/Wizard/WizardController.php:318
-msgid "CartBay hands recovery emails to WordPress and WooCommerce for delivery — it does not send email itself. If sending is unreliable, the fix is your site's mail setup, not CartBay."
+#: app/Admin/Wizard/WizardController.php:339
+msgid "A mail delivery plugin appears to be handling delivery."
+msgstr ""
+
+#: app/Admin/Settings/NotificationsSection.php:189
+msgid "Email logging detected, but no SMTP delivery service. Emails to buyers may not be delivered reliably."
+msgstr ""
+
+#: app/Admin/Settings/NotificationsSection.php:191
+msgid "No SMTP plugin detected. Without an SMTP service, recovery emails may land in spam."
 msgstr ""
 
 #: app/Admin/Settings/NotificationsSection.php:195
+msgid "Email Delivery Test"
+msgstr ""
+
+#: app/Admin/Settings/NotificationsSection.php:197
+#: app/Admin/Wizard/WizardController.php:319
+msgid "CartBay hands recovery emails to WordPress and WooCommerce for delivery — it does not send email itself. If sending is unreliable, the fix is your site's mail setup, not CartBay."
+msgstr ""
+
+#: app/Admin/Settings/NotificationsSection.php:206
 msgid "From email"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:199
+#: app/Admin/Settings/NotificationsSection.php:210
 msgid "From name"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:204
+#: app/Admin/Settings/NotificationsSection.php:215
 msgid "Delivery service"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:212
+#: app/Admin/Settings/NotificationsSection.php:221
+msgid "Detected via"
+msgstr ""
+
+#: app/Admin/Settings/NotificationsSection.php:229
 msgid "Recovery emails are sent with your WooCommerce store sender details."
 msgstr ""
 
 #. translators: %s: link to the WooCommerce email settings screen.
-#: app/Admin/Settings/NotificationsSection.php:218
+#: app/Admin/Settings/NotificationsSection.php:235
 #, php-format
 msgid "Change the From name and address in %s."
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:222
+#: app/Admin/Settings/NotificationsSection.php:239
 msgid "WooCommerce → Settings → Emails"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:230
-#: app/Admin/Wizard/WizardController.php:343
+#: app/Admin/Settings/NotificationsSection.php:247
+#: app/Admin/Wizard/WizardController.php:363
 msgid "Send to:"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:231
-#: app/Admin/Wizard/WizardController.php:344
+#: app/Admin/Settings/NotificationsSection.php:248
+#: app/Admin/Wizard/WizardController.php:364
 msgid "email@example.com"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:233
+#: app/Admin/Settings/NotificationsSection.php:250
 #: app/Admin/Settings/SettingsPage.php:475
-#: app/Admin/Wizard/WizardController.php:346
+#: app/Admin/Wizard/WizardController.php:366
 msgid "Send Test Email"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:236
-#: app/Admin/Wizard/WizardController.php:349
+#: app/Admin/Settings/NotificationsSection.php:253
+#: app/Admin/Wizard/WizardController.php:369
 msgid "Enter an email address and click to send a test email and verify delivery."
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:253
-#: app/Admin/Settings/OverviewSection.php:166
+#: app/Admin/Settings/NotificationsSection.php:270
+#: app/Admin/Settings/OverviewSection.php:175
 msgid "7 Days"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:254
-#: app/Admin/Settings/OverviewSection.php:167
+#: app/Admin/Settings/NotificationsSection.php:271
+#: app/Admin/Settings/OverviewSection.php:176
 msgid "30 Days"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:255
-#: app/Admin/Settings/OverviewSection.php:168
+#: app/Admin/Settings/NotificationsSection.php:272
+#: app/Admin/Settings/OverviewSection.php:177
 msgid "90 Days"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:282
+#: app/Admin/Settings/NotificationsSection.php:299
 msgid "Pending Queue"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:284
+#: app/Admin/Settings/NotificationsSection.php:301
 msgid "Current pending recovery emails: first-time queued notifications plus retry-queued notifications."
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:287
-#: app/Admin/Settings/OverviewSection.php:404
-#: app/Admin/Settings/OverviewSection.php:412
-#: app/Admin/Settings/OverviewSection.php:432
+#: app/Admin/Settings/NotificationsSection.php:304
+#: app/Admin/Settings/OverviewSection.php:455
+#: app/Admin/Settings/OverviewSection.php:463
+#: app/Admin/Settings/OverviewSection.php:483
 msgid "Emails Sent"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:289
+#: app/Admin/Settings/NotificationsSection.php:306
 msgid "Accepted or provider-delivered recovery emails tied to sessions in the selected period."
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:292
+#: app/Admin/Settings/NotificationsSection.php:309
 msgid "Emails Failed"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:294
+#: app/Admin/Settings/NotificationsSection.php:311
 msgid "Recovery emails tied to sessions in the selected period that ended in failed status."
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:297
+#: app/Admin/Settings/NotificationsSection.php:314
 msgid "Email Acceptance Rate"
 msgstr ""
 
-#: app/Admin/Settings/NotificationsSection.php:299
+#: app/Admin/Settings/NotificationsSection.php:316
 msgid "Accepted or delivered recovery emails divided by attempted recovery email sends."
 msgstr ""
 
@@ -431,202 +454,208 @@ msgstr ""
 msgid "CartBay Pro generates a unique, single-use coupon per shopper, sets an expiry, and auto-applies it when the cart is restored — so discount codes can't leak or be reused."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:82
+#: app/Admin/Settings/OverviewSection.php:91
 msgid "Overview"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:115
+#: app/Admin/Settings/OverviewSection.php:124
 msgid "Tracked Carts"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:117
+#: app/Admin/Settings/OverviewSection.php:126
 msgid "Captured checkout sessions created by CartBay during the selected period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:120
+#: app/Admin/Settings/OverviewSection.php:129
 msgid "Abandoned Carts"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:122
+#: app/Admin/Settings/OverviewSection.php:131
 msgid "Tracked carts that passed the inactivity timeout during the selected period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:125
+#: app/Admin/Settings/OverviewSection.php:134
 msgid "Recovered Carts"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:127
+#: app/Admin/Settings/OverviewSection.php:136
 msgid "Abandoned CartBay sessions that matched a later WooCommerce order in the selected period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:130
+#: app/Admin/Settings/OverviewSection.php:139
 msgid "Abandoned Cart Value"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:132
+#: app/Admin/Settings/OverviewSection.php:141
 msgid "Total cart value for sessions that became abandoned during the selected period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:136
+#: app/Admin/Settings/OverviewSection.php:145
 msgid "Recovered Revenue"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:138
+#: app/Admin/Settings/OverviewSection.php:147
 msgid "Revenue from WooCommerce orders matched to recovered CartBay sessions in the selected period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:142
+#: app/Admin/Settings/OverviewSection.php:151
 msgid "Recovery Rate"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:144
+#: app/Admin/Settings/OverviewSection.php:153
 msgid "Recovered carts divided by abandoned carts for the selected period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:173
+#: app/Admin/Settings/OverviewSection.php:182
 msgid "CartBay Overview"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:212
+#: app/Admin/Settings/OverviewSection.php:221
 msgid "Help"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:213
+#: app/Admin/Settings/OverviewSection.php:222
 msgid "Read the documentation to learn how to get started with CartBay. If you have any questions, please email us."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:217
-#: app/Admin/Wizard/WizardController.php:159
+#: app/Admin/Settings/OverviewSection.php:226
+#: app/Admin/Wizard/WizardController.php:160
 msgid "Documentation"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:218
+#: app/Admin/Settings/OverviewSection.php:227
 msgid "Open Setup Wizard"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:351
+#: app/Admin/Settings/OverviewSection.php:388
 msgid "Sessions"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:355
+#. translators: 1: number of sessions shown, 2: total number of sessions matching the filter.
+#: app/Admin/Settings/OverviewSection.php:397
+#, php-format
+msgid "Showing the %1$d most recent sessions of %2$d that match this filter. Narrow the period, status or search to see the rest."
+msgstr ""
+
+#: app/Admin/Settings/OverviewSection.php:406
 msgid "Filter by session status"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:357
+#: app/Admin/Settings/OverviewSection.php:408
 msgid "All statuses"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:391
+#: app/Admin/Settings/OverviewSection.php:442
 msgid "Search sessions"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:392
+#: app/Admin/Settings/OverviewSection.php:443
 msgid "Email or ID"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:393
+#: app/Admin/Settings/OverviewSection.php:444
 msgid "Search"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:398
-#: app/Admin/Settings/OverviewSection.php:406
-#: app/Admin/Settings/OverviewSection.php:426
+#: app/Admin/Settings/OverviewSection.php:449
+#: app/Admin/Settings/OverviewSection.php:457
+#: app/Admin/Settings/OverviewSection.php:477
 msgid "Session"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:399
-#: app/Admin/Settings/OverviewSection.php:407
-#: app/Admin/Settings/OverviewSection.php:427
+#: app/Admin/Settings/OverviewSection.php:450
+#: app/Admin/Settings/OverviewSection.php:458
+#: app/Admin/Settings/OverviewSection.php:478
 #: app/Core/Privacy.php:225
 msgid "Email"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:400
-#: app/Admin/Settings/OverviewSection.php:408
-#: app/Admin/Settings/OverviewSection.php:428
-#: app/Admin/Settings/OverviewSection.php:586
+#: app/Admin/Settings/OverviewSection.php:451
+#: app/Admin/Settings/OverviewSection.php:459
+#: app/Admin/Settings/OverviewSection.php:479
+#: app/Admin/Settings/OverviewSection.php:635
 #: app/Core/Privacy.php:229
 msgid "Status"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:401
-#: app/Admin/Settings/OverviewSection.php:409
-#: app/Admin/Settings/OverviewSection.php:429
+#: app/Admin/Settings/OverviewSection.php:452
+#: app/Admin/Settings/OverviewSection.php:460
+#: app/Admin/Settings/OverviewSection.php:480
 msgid "Cart Total"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:402
-#: app/Admin/Settings/OverviewSection.php:410
-#: app/Admin/Settings/OverviewSection.php:430
+#: app/Admin/Settings/OverviewSection.php:453
+#: app/Admin/Settings/OverviewSection.php:461
+#: app/Admin/Settings/OverviewSection.php:481
 msgid "Created"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:403
-#: app/Admin/Settings/OverviewSection.php:411
-#: app/Admin/Settings/OverviewSection.php:431
+#: app/Admin/Settings/OverviewSection.php:454
+#: app/Admin/Settings/OverviewSection.php:462
+#: app/Admin/Settings/OverviewSection.php:482
 msgid "Last Activity"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:416
+#: app/Admin/Settings/OverviewSection.php:467
 msgid "No sessions found."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:426
+#: app/Admin/Settings/OverviewSection.php:477
 msgid "Show more details"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:474
+#: app/Admin/Settings/OverviewSection.php:525
 #: app/Core/Privacy.php:233
 msgid "Captured"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:475
+#: app/Admin/Settings/OverviewSection.php:526
 msgid "Abandoned"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:476
+#: app/Admin/Settings/OverviewSection.php:527
 msgid "Recovered"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:477
+#: app/Admin/Settings/OverviewSection.php:528
 msgid "Suppressed"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:490
+#: app/Admin/Settings/OverviewSection.php:541
 msgid "Shopper email and cart data were captured and the cart is still inside the abandonment timeout."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:491
+#: app/Admin/Settings/OverviewSection.php:542
 msgid "The cart passed the inactivity timeout and is eligible for recovery emails."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:492
+#: app/Admin/Settings/OverviewSection.php:543
 msgid "A later WooCommerce order matched this CartBay session."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:493
+#: app/Admin/Settings/OverviewSection.php:544
 msgid "The shopper or email is excluded from recovery messaging."
 msgstr ""
 
 #. translators: %s: number of items
-#: app/Admin/Settings/OverviewSection.php:545
+#: app/Admin/Settings/OverviewSection.php:594
 #, php-format
 msgid "%s items"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:583
+#: app/Admin/Settings/OverviewSection.php:632
 msgid "Status Guide"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:584
+#: app/Admin/Settings/OverviewSection.php:633
 msgid "Current session counts help explain the table filters. Overview cards above use the selected reporting period."
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:587
+#: app/Admin/Settings/OverviewSection.php:636
 msgid "Current Sessions"
 msgstr ""
 
-#: app/Admin/Settings/OverviewSection.php:588
+#: app/Admin/Settings/OverviewSection.php:637
 msgid "Meaning"
 msgstr ""
 
@@ -681,19 +710,19 @@ msgstr ""
 
 #: app/Admin/Settings/RecoverySequenceSection.php:145
 #: app/Admin/Settings/SettingsPage.php:481
-#: app/Admin/Wizard/WizardController.php:282
+#: app/Admin/Wizard/WizardController.php:283
 msgid "minutes"
 msgstr ""
 
 #: app/Admin/Settings/RecoverySequenceSection.php:146
 #: app/Admin/Settings/SettingsPage.php:479
-#: app/Admin/Wizard/WizardController.php:283
+#: app/Admin/Wizard/WizardController.php:284
 msgid "hours"
 msgstr ""
 
 #: app/Admin/Settings/RecoverySequenceSection.php:147
 #: app/Admin/Settings/SettingsPage.php:477
-#: app/Admin/Wizard/WizardController.php:284
+#: app/Admin/Wizard/WizardController.php:285
 msgid "days"
 msgstr ""
 
@@ -827,7 +856,7 @@ msgid "CartBay does not send email itself — this depends on your site's mail s
 msgstr ""
 
 #: app/Admin/Settings/SettingsSection.php:37
-#: app/Core/Plugin.php:434
+#: app/Core/Plugin.php:436
 msgid "Settings"
 msgstr ""
 
@@ -1047,156 +1076,158 @@ msgstr ""
 msgid "Replaced with"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:70
+#: app/Admin/Wizard/WizardController.php:71
 msgid "You do not have permission to access CartBay."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:105
-#: app/Core/Plugin.php:408
+#: app/Admin/Wizard/WizardController.php:106
+#: app/Core/Plugin.php:410
 msgid "CartBay Setup Wizard"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:107
+#: app/Admin/Wizard/WizardController.php:108
 msgid "Setup progress"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:115
+#: app/Admin/Wizard/WizardController.php:116
 msgid "Current"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:115
+#: app/Admin/Wizard/WizardController.php:116
 msgid "Complete"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:115
+#: app/Admin/Wizard/WizardController.php:116
 msgid "Upcoming"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:143
+#: app/Admin/Wizard/WizardController.php:144
 msgid "Back"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:147
+#: app/Admin/Wizard/WizardController.php:148
 msgid "Finish Setup"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:147
+#: app/Admin/Wizard/WizardController.php:148
 msgid "Next"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:204
+#: app/Admin/Wizard/WizardController.php:205
 msgid "Welcome to CartBay!"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:205
+#: app/Admin/Wizard/WizardController.php:206
 msgid "CartBay helps you recover abandoned carts with a 3-email recovery sequence. Let's set it up in under 5 minutes."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:206
+#: app/Admin/Wizard/WizardController.php:207
 msgid "Click \"Next\" to get started."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:221
-#: app/Admin/Wizard/WizardController.php:574
+#: app/Admin/Wizard/WizardController.php:222
+#: app/Admin/Wizard/WizardController.php:593
 msgid "Consent & Timing"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:226
+#: app/Admin/Wizard/WizardController.php:227
 msgid "This text appears beside the checkout consent checkbox. It tells shoppers that CartBay may save their email and cart so the store can send recovery reminders if they leave checkout."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:235
+#: app/Admin/Wizard/WizardController.php:236
 msgid "Sets whether the checkout consent checkbox starts checked or unchecked. CartBay only captures a shopper's email and cart while this box is checked."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:243
+#: app/Admin/Wizard/WizardController.php:244
 msgid "EU/UK stores should keep this unchecked to comply with GDPR. Stores selling only where opt-out is allowed (for example, the US) may switch it to Checked."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:249
+#: app/Admin/Wizard/WizardController.php:250
 msgid "CartBay waits this long after the shopper last interacts with checkout before marking the cart abandoned. Shorter values start recovery sooner; longer values reduce the chance of emailing someone who is still checking out."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:253
+#: app/Admin/Wizard/WizardController.php:254
 msgid "How long before a captured cart is considered abandoned."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:257
+#: app/Admin/Wizard/WizardController.php:258
 msgid "Recovery Email Schedule"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:259
+#: app/Admin/Wizard/WizardController.php:260
 msgid "Recovery email schedule"
 msgstr ""
 
 #. translators: %d: recovery email step number.
-#: app/Admin/Wizard/WizardController.php:272
+#: app/Admin/Wizard/WizardController.php:273
 #, php-format
 msgid "Email %d sends after"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:289
+#: app/Admin/Wizard/WizardController.php:290
 msgid "These starter intervals control when each recovery email is sent after the cart becomes abandoned. You can refine message focus and coupons later in CartBay settings."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:316
-#: app/Admin/Wizard/WizardController.php:575
+#: app/Admin/Wizard/WizardController.php:317
+#: app/Admin/Wizard/WizardController.php:594
 msgid "Email Delivery"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:322
-msgid "SMTP delivery detected. Your emails should deliver reliably."
+#. translators: %s: name of the detected mail delivery plugin.
+#: app/Admin/Wizard/WizardController.php:335
+#, php-format
+msgid "SMTP delivery detected: %s. Your emails should deliver reliably."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:327
+#: app/Admin/Wizard/WizardController.php:347
 msgid "An email logging plugin is active, but no SMTP delivery service was detected."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:328
+#: app/Admin/Wizard/WizardController.php:348
 msgid "Emails to buyers may not be delivered reliably."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:335
+#: app/Admin/Wizard/WizardController.php:355
 msgid "No SMTP plugin detected."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:336
+#: app/Admin/Wizard/WizardController.php:356
 msgid "Without an SMTP service, recovery emails may land in spam. Consider installing an SMTP plugin."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:364
+#: app/Admin/Wizard/WizardController.php:384
 msgid "Launch CartBay"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:367
+#: app/Admin/Wizard/WizardController.php:387
 msgid "Enable Recovery Emails"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:371
+#: app/Admin/Wizard/WizardController.php:391
 msgid "Start sending recovery emails to abandoned carts"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:376
+#: app/Admin/Wizard/WizardController.php:396
 msgid "You can change this and other settings later from the CartBay Settings page."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:552
+#: app/Admin/Wizard/WizardController.php:571
 msgid "The first recovery email should arrive while the shopper still remembers the cart. Use a shorter delay for a quick reminder without discounting too early."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:553
+#: app/Admin/Wizard/WizardController.php:572
 msgid "The second email gives shoppers time to compare options before following up. Use this interval to avoid making the sequence feel too aggressive."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:554
+#: app/Admin/Wizard/WizardController.php:573
 msgid "The final email is the later reminder and usually carries the strongest recovery message. A longer delay keeps it from feeling repetitive."
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:573
+#: app/Admin/Wizard/WizardController.php:592
 msgid "Welcome"
 msgstr ""
 
-#: app/Admin/Wizard/WizardController.php:576
+#: app/Admin/Wizard/WizardController.php:595
 msgid "Launch"
 msgstr ""
 
@@ -1204,20 +1235,20 @@ msgstr ""
 msgid "You do not have permission to view analytics."
 msgstr ""
 
-#: app/Api/Routes/CaptureRoute.php:155
-#: app/Api/Routes/CaptureRoute.php:195
+#: app/Api/Routes/CaptureRoute.php:165
+#: app/Api/Routes/CaptureRoute.php:205
 msgid "Invalid or expired request. Please reload the checkout page and try again."
 msgstr ""
 
-#: app/Api/Routes/CaptureRoute.php:166
+#: app/Api/Routes/CaptureRoute.php:176
 msgid "Too many requests. Please try again later."
 msgstr ""
 
-#: app/Api/Routes/CaptureRoute.php:215
+#: app/Api/Routes/CaptureRoute.php:225
 msgid "Invalid email address."
 msgstr ""
 
-#: app/Api/Routes/CaptureRoute.php:225
+#: app/Api/Routes/CaptureRoute.php:235
 msgid "Capture disabled."
 msgstr ""
 
@@ -1274,7 +1305,7 @@ msgid "Test flow triggered. Email will arrive in ~30 seconds."
 msgstr ""
 
 #: app/Core/CheckoutFields.php:61
-#: app/Core/Installer.php:116
+#: app/Core/Installer.php:119
 msgid "Save my email to recover my cart if I leave."
 msgstr ""
 
@@ -1288,31 +1319,31 @@ msgstr ""
 msgid "CartBay could not resolve the service \"%s\"."
 msgstr ""
 
-#: app/Core/Installer.php:161
+#: app/Core/Installer.php:164
 #: app/Email/CartBay_Email_Recovery_1.php:36
 msgid "<p>Hi there,</p><p>You were close to checking out, so we saved your cart for you.</p><p>Come back while everything is still fresh and finish your order in just a few clicks.</p>"
 msgstr ""
 
-#: app/Core/Installer.php:162
-#: app/Core/Installer.php:282
+#: app/Core/Installer.php:165
+#: app/Core/Installer.php:285
 #: app/Email/CartBay_Email_Recovery_1.php:32
 msgid "[{site_title}] You left something in your cart"
 msgstr ""
 
-#: app/Core/Installer.php:163
-#: app/Core/Installer.php:283
+#: app/Core/Installer.php:166
+#: app/Core/Installer.php:286
 #: app/Email/CartBay_Email_Recovery_1.php:33
 msgid "You left something behind"
 msgstr ""
 
-#: app/Core/Installer.php:164
-#: app/Core/Installer.php:284
+#: app/Core/Installer.php:167
+#: app/Core/Installer.php:287
 #: app/Email/CartBay_Email_Recovery_1.php:34
 msgid "Pick up where you left off before your cart goes cold."
 msgstr ""
 
-#: app/Core/Installer.php:165
-#: app/Core/Installer.php:285
+#: app/Core/Installer.php:168
+#: app/Core/Installer.php:288
 #: app/Email/CartBay_Email_Recovery_1.php:35
 #: templates/emails/recovery-email-1.php:31
 #: templates/emails/recovery-email-2.php:31
@@ -1320,111 +1351,111 @@ msgstr ""
 msgid "Return to My Cart"
 msgstr ""
 
-#: app/Core/Installer.php:170
+#: app/Core/Installer.php:173
 #: app/Email/CartBay_Email_Recovery_2.php:36
 msgid "<p>Still thinking it over?</p><p>Your cart is still waiting for you, and checkout only takes a moment.</p><p>If anything was getting in the way, this is a great time to jump back in and complete your order.</p>"
 msgstr ""
 
-#: app/Core/Installer.php:171
-#: app/Core/Installer.php:289
+#: app/Core/Installer.php:174
+#: app/Core/Installer.php:292
 #: app/Email/CartBay_Email_Recovery_2.php:32
 msgid "[{site_title}] Your cart is waiting for you"
 msgstr ""
 
-#: app/Core/Installer.php:172
-#: app/Core/Installer.php:290
+#: app/Core/Installer.php:175
+#: app/Core/Installer.php:293
 #: app/Email/CartBay_Email_Recovery_2.php:33
 msgid "Still thinking about it?"
 msgstr ""
 
-#: app/Core/Installer.php:173
-#: app/Core/Installer.php:291
+#: app/Core/Installer.php:176
+#: app/Core/Installer.php:294
 #: app/Email/CartBay_Email_Recovery_2.php:34
 msgid "Your saved cart is ready whenever you are."
 msgstr ""
 
-#: app/Core/Installer.php:174
-#: app/Core/Installer.php:292
+#: app/Core/Installer.php:177
+#: app/Core/Installer.php:295
 #: app/Email/CartBay_Email_Recovery_2.php:35
 msgid "Complete My Order"
 msgstr ""
 
-#: app/Core/Installer.php:179
+#: app/Core/Installer.php:182
 #: app/Email/CartBay_Email_Recovery_3.php:36
 msgid "<p>This is your last chance to complete your order.</p><p>Your cart is still saved and ready for you. If you still want these items, now is the best time to come back.</p>"
 msgstr ""
 
-#: app/Core/Installer.php:180
-#: app/Core/Installer.php:296
+#: app/Core/Installer.php:183
+#: app/Core/Installer.php:299
 #: app/Email/CartBay_Email_Recovery_3.php:32
 msgid "[{site_title}] Last chance to complete your order"
 msgstr ""
 
-#: app/Core/Installer.php:181
-#: app/Core/Installer.php:297
+#: app/Core/Installer.php:184
+#: app/Core/Installer.php:300
 #: app/Email/CartBay_Email_Recovery_3.php:33
 msgid "Your cart is still here"
 msgstr ""
 
-#: app/Core/Installer.php:182
-#: app/Core/Installer.php:298
+#: app/Core/Installer.php:185
+#: app/Core/Installer.php:301
 #: app/Email/CartBay_Email_Recovery_3.php:34
 msgid "A final reminder to finish checking out before your cart expires."
 msgstr ""
 
-#: app/Core/Installer.php:183
-#: app/Core/Installer.php:299
+#: app/Core/Installer.php:186
+#: app/Core/Installer.php:302
 #: app/Email/CartBay_Email_Recovery_3.php:35
 msgid "Claim My Cart"
 msgstr ""
 
-#: app/Core/Plugin.php:361
+#: app/Core/Plugin.php:363
 msgid "CartBay Templates"
 msgstr ""
 
-#: app/Core/Plugin.php:374
+#: app/Core/Plugin.php:376
 msgid "CartBay Suppressions"
 msgstr ""
 
-#: app/Core/Plugin.php:398
-#: app/Core/Plugin.php:399
+#: app/Core/Plugin.php:400
+#: app/Core/Plugin.php:401
 msgid "CartBay"
 msgstr ""
 
-#: app/Core/Plugin.php:409
+#: app/Core/Plugin.php:411
 msgid "Setup Wizard"
 msgstr ""
 
-#: app/Core/Plugin.php:429
+#: app/Core/Plugin.php:431
 msgid "Manage"
 msgstr ""
 
-#: app/Core/Plugin.php:439
+#: app/Core/Plugin.php:441
 msgid "Docs"
 msgstr ""
 
-#: app/Core/Plugin.php:523
+#: app/Core/Plugin.php:538
 msgid "CartBay: Captured"
 msgstr ""
 
-#: app/Core/Plugin.php:524
+#: app/Core/Plugin.php:539
 msgid "CartBay: Abandoned"
 msgstr ""
 
-#: app/Core/Plugin.php:525
+#: app/Core/Plugin.php:540
 msgid "CartBay: Recovered"
 msgstr ""
 
-#: app/Core/Plugin.php:526
+#: app/Core/Plugin.php:541
 msgid "CartBay: Expired"
 msgstr ""
 
-#: app/Core/Plugin.php:527
+#: app/Core/Plugin.php:542
 msgid "CartBay: Suppressed"
 msgstr ""
 
 #. translators: %s: number of orders currently in the captured CartBay status.
-#: app/Core/Plugin.php:541
+#: app/Core/Plugin.php:556
 #, php-format
 msgid "CartBay: Captured <span class=\"count\">(%s)</span>"
 msgid_plural "CartBay: Captured <span class=\"count\">(%s)</span>"
@@ -1432,7 +1463,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of orders currently in the abandoned CartBay status.
-#: app/Core/Plugin.php:543
+#: app/Core/Plugin.php:558
 #, php-format
 msgid "CartBay: Abandoned <span class=\"count\">(%s)</span>"
 msgid_plural "CartBay: Abandoned <span class=\"count\">(%s)</span>"
@@ -1440,7 +1471,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of orders currently in the recovered CartBay status.
-#: app/Core/Plugin.php:545
+#: app/Core/Plugin.php:560
 #, php-format
 msgid "CartBay: Recovered <span class=\"count\">(%s)</span>"
 msgid_plural "CartBay: Recovered <span class=\"count\">(%s)</span>"
@@ -1448,7 +1479,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of orders currently in the expired CartBay status.
-#: app/Core/Plugin.php:547
+#: app/Core/Plugin.php:562
 #, php-format
 msgid "CartBay: Expired <span class=\"count\">(%s)</span>"
 msgid_plural "CartBay: Expired <span class=\"count\">(%s)</span>"
@@ -1456,44 +1487,44 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of orders currently in the suppressed CartBay status.
-#: app/Core/Plugin.php:549
+#: app/Core/Plugin.php:564
 #, php-format
 msgid "CartBay: Suppressed <span class=\"count\">(%s)</span>"
 msgid_plural "CartBay: Suppressed <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/Core/Plugin.php:916
+#: app/Core/Plugin.php:931
 #: app/Email/AbstractCartBayRecoveryEmail.php:469
 #: app/Email/AbstractCartBayRecoveryEmail.php:541
 msgid "SAVE10"
 msgstr ""
 
-#: app/Core/Plugin.php:1064
+#: app/Core/Plugin.php:1079
 msgid "You have been unsubscribed from cart recovery emails."
 msgstr ""
 
-#: app/Core/Plugin.php:1068
+#: app/Core/Plugin.php:1083
 msgid "Invalid unsubscribe link."
 msgstr ""
 
-#: app/Core/Plugin.php:1072
+#: app/Core/Plugin.php:1087
 msgid "Too many unsubscribe attempts. Please wait a moment and try again."
 msgstr ""
 
-#: app/Core/Plugin.php:1079
+#: app/Core/Plugin.php:1094
 msgid "This cart recovery link has expired. Please add items to your cart again."
 msgstr ""
 
-#: app/Core/Plugin.php:1083
+#: app/Core/Plugin.php:1098
 msgid "Invalid cart recovery link."
 msgstr ""
 
-#: app/Core/Plugin.php:1087
+#: app/Core/Plugin.php:1102
 msgid "Too many cart recovery attempts. Please wait a moment and try again."
 msgstr ""
 
-#: app/Core/Plugin.php:1091
+#: app/Core/Plugin.php:1106
 #: app/Recovery/RestoreService.php:469
 msgid "We could not restore the items from this recovery link. Please add them to your cart again."
 msgstr ""

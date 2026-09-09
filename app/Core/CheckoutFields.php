@@ -97,7 +97,14 @@ class CheckoutFields {
 
 		$settings = get_option( 'cartbay_settings', array() );
 
-		return 'unchecked' !== ( $settings['consent_default_state'] ?? 'unchecked' );
+		/*
+		 * Fail safe, not fail open. Only the exact literal 'checked' pre-ticks
+		 * the box; every other value — empty string, a stale option, a typo, a
+		 * value written by a third party — leaves it unchecked. Under the GDPR a
+		 * pre-ticked box is not valid consent, so the failure direction on this
+		 * setting has to be toward asking rather than assuming.
+		 */
+		return 'checked' === ( $settings['consent_default_state'] ?? 'unchecked' );
 	}
 
 	/**

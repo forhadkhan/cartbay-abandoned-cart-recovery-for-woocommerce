@@ -25,6 +25,15 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class AnalyticsService {
+	/**
+	 * Number of session orders hydrated per analytics query batch.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @var int
+	 */
+	private const QUERY_BATCH_SIZE = 200;
+
 
 	/**
 	 * Transient cache key.
@@ -101,35 +110,56 @@ class AnalyticsService {
 	 * @return array
 	 */
 	private function build( int $days ): array {
-		$since_timestamp    = time() - ( $days * DAY_IN_SECONDS );
-		$abandoned_sessions = $this->get_sessions_by_meta_timestamp(
-			array( 'wc-cartbay-abandoned', 'wc-cartbay-recovered' ),
-			'_cartbay_abandoned_at',
-			$since_timestamp
-		);
-		$recovered_sessions = $this->get_sessions_by_meta_timestamp(
-			array( 'wc-cartbay-recovered' ),
-			'_cartbay_recovered_at',
-			$since_timestamp
-		);
+		$since_timestamp = time() - ( $days * DAY_IN_SECONDS );
 
 		// Count tracked carts on the same CartBay meta-timestamp basis as the
 		// abandoned/recovered funnel (capture time), rather than order
-		// date_created, so the funnel metrics stay consistent.
-		$captured        = count(
-			$this->get_sessions_by_meta_timestamp(
-				array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered' ),
-				'_cartbay_captured_at',
-				$since_timestamp
-			)
+		// date_created, so the funnel metrics stay consistent. Counted in the
+		// database rather than by hydrating and counting order objects.
+		$captured = $this->count_sessions_in_period(
+			array( 'wc-cartbay-captured', 'wc-cartbay-abandoned', 'wc-cartbay-recovered' ),
+			'_cartbay_captured_at',
+			$since_timestamp
 		);
-		$abandoned       = count( $abandoned_sessions );
-		$recovered       = count( $recovered_sessions );
-		$abandoned_value = $this->sum_abandoned_value( $abandoned_sessions );
-		$revenue         = $this->sum_recovered_revenue( $recovered_sessions );
-		$rate            = $abandoned > 0 ? round( ( $recovered / $abandoned ) * 100, 1 ) : 0.0;
-		$email_funnel    = $this->build_email_funnel( $abandoned_sessions );
-		$send_rate       = $email_funnel['attempted'] > 0 ? round( ( $email_funnel['sent'] / $email_funnel['attempted'] ) * 100, 1 ) : 0.0;
+
+		$abandoned       = 0;
+		$abandoned_value = 0.0;
+		$email_funnel    = array(
+			'queued'    => 0,
+			'attempted' => 0,
+			'sent'      => 0,
+			'failed'    => 0,
+		);
+
+		$this->each_session_batch_in_period(
+			array( 'wc-cartbay-abandoned', 'wc-cartbay-recovered' ),
+			'_cartbay_abandoned_at',
+			$since_timestamp,
+			function ( array $batch ) use ( &$abandoned, &$abandoned_value, &$email_funnel ): void {
+				$abandoned       += count( $batch );
+				$abandoned_value += $this->sum_abandoned_value( $batch );
+
+				foreach ( $this->build_email_funnel( $batch ) as $key => $value ) {
+					$email_funnel[ $key ] += $value;
+				}
+			}
+		);
+
+		$recovered = 0;
+		$revenue   = 0.0;
+
+		$this->each_session_batch_in_period(
+			array( 'wc-cartbay-recovered' ),
+			'_cartbay_recovered_at',
+			$since_timestamp,
+			function ( array $batch ) use ( &$recovered, &$revenue ): void {
+				$recovered += count( $batch );
+				$revenue   += $this->sum_recovered_revenue( $batch );
+			}
+		);
+
+		$rate      = $abandoned > 0 ? round( ( $recovered / $abandoned ) * 100, 1 ) : 0.0;
+		$send_rate = $email_funnel['attempted'] > 0 ? round( ( $email_funnel['sent'] / $email_funnel['attempted'] ) * 100, 1 ) : 0.0;
 
 		return array(
 			'tracked'         => $captured,
@@ -191,50 +221,105 @@ class AnalyticsService {
 	}
 
 	/**
-	 * Get sessions with a timestamp meta value inside the reporting period.
+	 * Build the shared query arguments for sessions inside a reporting period.
 	 *
-	 * @since 1.0.0
+	 * The period bound is applied in the database via meta_query. Before 1.1.1
+	 * this method fetched every session ever created with limit => -1 and
+	 * filtered in PHP, which grew without limit and exhausted memory on a busy
+	 * store.
+	 *
+	 * @since 1.1.1
 	 *
 	 * @param array<int, string> $statuses        WC order statuses.
 	 * @param string             $meta_key        Timestamp meta key.
 	 * @param int                $since_timestamp Period start timestamp.
 	 *
-	 * @return array<int, WC_Order> Matching session orders.
+	 * @return array<string, mixed> Query arguments.
 	 */
-	private function get_sessions_by_meta_timestamp( array $statuses, string $meta_key, int $since_timestamp ): array {
-		$sessions = $this->get_sessions_by_statuses( $statuses );
-
-		return array_values(
-			array_filter(
-				$sessions,
-				static function ( WC_Order $session ) use ( $meta_key, $since_timestamp ): bool {
-					$event_timestamp = absint( $session->get_meta( $meta_key, true ) );
-
-					return $event_timestamp >= $since_timestamp;
-				}
-			)
+	private function period_query_args( array $statuses, string $meta_key, int $since_timestamp ): array {
+		return array(
+			'status'     => $statuses,
+			'orderby'    => 'ID',
+			'order'      => 'ASC',
+			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounding the result set in SQL is the point; the alternative is scanning every session.
+				array(
+					'key'     => $meta_key,
+					'value'   => $since_timestamp,
+					'compare' => '>=',
+					'type'    => 'NUMERIC',
+				),
+			),
 		);
 	}
 
 	/**
-	 * Get sessions by status.
+	 * Count sessions inside the reporting period without hydrating them.
 	 *
-	 * @since 1.0.0
+	 * @since 1.1.1
 	 *
-	 * @param array<int, string> $statuses WC order statuses.
+	 * @param array<int, string> $statuses        WC order statuses.
+	 * @param string             $meta_key        Timestamp meta key.
+	 * @param int                $since_timestamp Period start timestamp.
 	 *
-	 * @return array<int, WC_Order> Matching session orders.
+	 * @return int Matching session count.
 	 */
-	private function get_sessions_by_statuses( array $statuses ): array {
-		$sessions = wc_get_orders(
-			array(
-				'status' => $statuses,
-				'limit'  => -1,
-				'return' => 'objects',
+	private function count_sessions_in_period( array $statuses, string $meta_key, int $since_timestamp ): int {
+		$results = wc_get_orders(
+			array_merge(
+				$this->period_query_args( $statuses, $meta_key, $since_timestamp ),
+				array(
+					'limit'    => 1,
+					'return'   => 'ids',
+					'paginate' => true,
+				)
 			)
 		);
 
-		return array_values( $sessions );
+		return is_object( $results ) ? absint( $results->total ?? 0 ) : 0;
+	}
+
+	/**
+	 * Walk sessions inside the reporting period in bounded batches.
+	 *
+	 * Each batch is handed to the callback and then released, so peak memory is
+	 * a function of the batch size rather than of how many sessions the store
+	 * has accumulated.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @param array<int, string> $statuses        WC order statuses.
+	 * @param string             $meta_key        Timestamp meta key.
+	 * @param int                $since_timestamp Period start timestamp.
+	 * @param callable           $handler         Receives array<int, WC_Order>.
+	 *
+	 * @return void
+	 */
+	private function each_session_batch_in_period( array $statuses, string $meta_key, int $since_timestamp, callable $handler ): void {
+		$args = $this->period_query_args( $statuses, $meta_key, $since_timestamp );
+		$page = 1;
+
+		do {
+			$batch = wc_get_orders(
+				array_merge(
+					$args,
+					array(
+						'limit'  => self::QUERY_BATCH_SIZE,
+						'page'   => $page,
+						'return' => 'objects',
+					)
+				)
+			);
+
+			if ( ! is_array( $batch ) || array() === $batch ) {
+				return;
+			}
+
+			$handler( $batch );
+
+			$fetched = count( $batch );
+			unset( $batch );
+			++$page;
+		} while ( self::QUERY_BATCH_SIZE === $fetched );
 	}
 
 	/**

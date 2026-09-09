@@ -7,6 +7,8 @@
 
 namespace WPAnchorBay\CartBay\Admin\Settings;
 
+use WPAnchorBay\CartBay\Core\Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -84,15 +86,20 @@ class CaptureSection extends AbstractSettingsSection {
 			),
 			array(
 				'title'             => __( 'Abandonment Timeout (minutes)', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
-				'desc'              => __( 'Minutes of inactivity before a cart is marked as abandoned.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+				'desc'              => sprintf(
+					/* translators: 1: minimum minutes, 2: maximum minutes. */
+					__( 'Minutes of inactivity before a cart is marked as abandoned. Accepts %1$d to %2$d minutes.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+					Settings::ABANDONMENT_TIMEOUT_MIN,
+					Settings::ABANDONMENT_TIMEOUT_MAX
+				),
 				'desc_tip'          => __( 'CartBay waits this long after the shopper stops interacting before the recovery sequence becomes eligible.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 				'id'                => 'cartbay_settings[abandonment_timeout]',
-				'default'           => 30,
+				'default'           => Settings::ABANDONMENT_TIMEOUT_DEFAULT,
 				'type'              => 'number',
 				'css'               => 'width:80px;',
 				'custom_attributes' => array(
-					'min' => 5,
-					'max' => 1440,
+					'min' => Settings::ABANDONMENT_TIMEOUT_MIN,
+					'max' => Settings::ABANDONMENT_TIMEOUT_MAX,
 				),
 			),
 			array(
@@ -100,5 +107,47 @@ class CaptureSection extends AbstractSettingsSection {
 				'id'   => 'cartbay_capture_settings',
 			),
 		);
+	}
+
+	/**
+	 * Normalize capture settings after WooCommerce has written them.
+	 *
+	 * WooCommerce's woocommerce_update_options() stores whatever was posted. The HTML min/max
+	 * on the timeout field is a browser convenience, not a control, so the range
+	 * is enforced here as well; the consent default is normalized for the same
+	 * reason, since only the exact literal 'checked' may pre-tick a consent box.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @return void
+	 */
+	public function save(): void {
+		$settings = get_option( 'cartbay_settings', array() );
+		$settings = is_array( $settings ) ? $settings : array();
+
+		$stored_timeout  = $settings['abandonment_timeout'] ?? Settings::ABANDONMENT_TIMEOUT_DEFAULT;
+		$clamped_timeout = Settings::clamp_abandonment_timeout( $stored_timeout );
+
+		if ( (string) $stored_timeout !== (string) $clamped_timeout ) {
+			$settings['abandonment_timeout'] = $clamped_timeout;
+
+			if ( class_exists( 'WC_Admin_Settings' ) ) {
+				\WC_Admin_Settings::add_error(
+					sprintf(
+						/* translators: 1: minimum minutes, 2: maximum minutes, 3: value that was saved instead. */
+						__( 'Abandonment Timeout must be between %1$d and %2$d minutes. It has been saved as %3$d.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+						Settings::ABANDONMENT_TIMEOUT_MIN,
+						Settings::ABANDONMENT_TIMEOUT_MAX,
+						$clamped_timeout
+					)
+				);
+			}
+		} else {
+			$settings['abandonment_timeout'] = $clamped_timeout;
+		}
+
+		$settings['consent_default_state'] = Settings::normalize_consent_default_state( $settings['consent_default_state'] ?? 'unchecked' );
+
+		update_option( 'cartbay_settings', $settings );
 	}
 }

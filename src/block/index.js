@@ -317,7 +317,9 @@ import apiFetch from '@wordpress/api-fetch';
 			return;
 		}
 
-		consentBox.checked = getConsentDefaultState() !== 'unchecked';
+		// Only the exact literal 'checked' pre-ticks the box; anything else
+		// leaves consent to be given explicitly.
+		consentBox.checked = getConsentDefaultState() === 'checked';
 		defaultStateApplied = true;
 	}
 
