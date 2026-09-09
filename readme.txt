@@ -56,6 +56,14 @@ CartBay intentionally stays focused on doing one job well. It does **not** inclu
 * A/B testing
 * Exit-intent popups
 
+= Works alongside WooCommerce 11's built-in cart recovery =
+
+WooCommerce 11 added an experimental **Abandoned cart recovery** option under **WooCommerce > Settings > Advanced > Features**. It sends one email, two hours after a shopper places an order that then goes unpaid.
+
+CartBay covers the much larger group that comes earlier: shoppers who reach your checkout and leave **without ever placing an order**. No order is created, so there is nothing for WooCommerce's feature to act on. For those shoppers CartBay captures a consented email at the checkout, runs a three-email sequence on your own schedule, and rebuilds their actual cart when they return.
+
+You can run both. While CartBay's capture is enabled, CartBay automatically tells WooCommerce to stand down, so **no shopper is ever emailed twice**. See the FAQ below for a full comparison.
+
 = Upgrade to CartBay Pro =
 
 Everything above is included in the free plugin. **CartBay Pro** is an optional licensed add-on that installs on top of CartBay and adds:
