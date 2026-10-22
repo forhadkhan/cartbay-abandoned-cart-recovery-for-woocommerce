@@ -66,6 +66,17 @@ if ( ! class_exists( 'WC_Order' ) ) {
 		public function update_meta_data( string $key, mixed $value ): void {}
 
 		/**
+		 * Add order meta, optionally keeping earlier values for the same key.
+		 *
+		 * @param string $key    Meta key.
+		 * @param mixed  $value  Meta value.
+		 * @param bool   $unique Whether to replace instead of adding another row.
+		 *
+		 * @return void
+		 */
+		public function add_meta_data( string $key, mixed $value, bool $unique = false ): void {}
+
+		/**
 		 * Save the order.
 		 *
 		 * @return int

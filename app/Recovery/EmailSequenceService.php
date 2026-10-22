@@ -202,8 +202,7 @@ class EmailSequenceService {
 		$restore_url = add_query_arg( array( 'cartbay_restore' => $token ), home_url( '/' ) );
 
 		// Generate unsubscribe token.
-		$unsub_token = TokenHelper::generate();
-		$session->update_meta_data( '_cartbay_unsub_token_hash', TokenHelper::hash( $unsub_token ) );
+		$unsub_token = $this->issue_unsubscribe_token( $session );
 		$session->save();
 		$unsubscribe_url = add_query_arg( array( 'cartbay_unsubscribe' => $unsub_token ), home_url( '/' ) );
 
@@ -288,6 +287,26 @@ class EmailSequenceService {
 			),
 			'emails'
 		);
+	}
+
+	/**
+	 * Create an unsubscribe token for one email and remember its hash on the session.
+	 *
+	 * Earlier tokens are kept, so the unsubscribe link in an email that was already
+	 * delivered keeps working after later steps have been sent. An opt-out link must
+	 * never stop working.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param \WC_Order $session Session order.
+	 *
+	 * @return string Plain unsubscribe token for the email link.
+	 */
+	private function issue_unsubscribe_token( \WC_Order $session ): string {
+		$token = TokenHelper::generate();
+		$session->add_meta_data( '_cartbay_unsub_token_hash', TokenHelper::hash( $token ), false );
+
+		return $token;
 	}
 
 	/**
