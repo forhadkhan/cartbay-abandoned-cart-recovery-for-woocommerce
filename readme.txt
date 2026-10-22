@@ -206,6 +206,7 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 
 = 1.1.2 =
 * Fixed: a recovery email that failed to send was counted as pending, so Emails Failed stayed at 0 and nothing showed that your store could not send mail until every retry was used up. A failed send now counts under Emails Failed straight away, including while it waits to be retried, and Pending Queue counts only the emails that have not been tried yet.
+* Fixed: the unsubscribe link in an earlier recovery email stopped working once a later email in the sequence was sent, because each send replaced the previous unsubscribe token. Every unsubscribe link now stays valid.
 
 = 1.1.1 =
 * Improved: the Overview and reporting screens stay fast on stores that have built up a lot of recovery sessions.
@@ -234,7 +235,7 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 == Upgrade Notice ==
 
 = 1.1.2 =
-Recovery emails that fail to send now show under Emails Failed right away instead of looking pending, so a store with broken email delivery can tell.
+Recovery emails that fail to send now show under Emails Failed right away instead of looking pending, so a store with broken email delivery can tell. Unsubscribe links in earlier emails also keep working after later emails are sent.
 
 = 1.1.1 =
 Maintenance release. The email delivery check no longer tells you your email is fine when it is not, the consent box at checkout stays unticked unless you choose otherwise, excluded shoppers now show up, and the reporting screens stay fast on busy stores.
