@@ -1,12 +1,12 @@
 === CartBay - Abandoned Cart Recovery for WooCommerce ===
 Contributors: wpanchorbay, forhadkhan, sankarsan, arifac, shuvendushekhar
-Tags: abandoned cart, cart recovery, cart abandonment, boost sales, email reminder
+Tags: woocommerce abandoned cart, abandoned carts, abandoned cart recovery, recover abandoned cart, follow up emails
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.0
 WC requires at least: 9.8
-WC tested up to: 11.0
-Stable tag: 1.1.1
+WC tested up to: 11.2
+Stable tag: 1.1.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -204,6 +204,9 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 
 == Changelog ==
 
+= 1.1.2 =
+* Fixed: a recovery email that failed to send was counted as pending, so Emails Failed stayed at 0 and nothing showed that your store could not send mail until every retry was used up. A failed send now counts under Emails Failed straight away, including while it waits to be retried, and Pending Queue counts only the emails that have not been tried yet.
+
 = 1.1.1 =
 * Improved: the Overview and reporting screens stay fast on stores that have built up a lot of recovery sessions.
 * Improved: the email delivery check now tells you which email plugin it found.
@@ -229,6 +232,9 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+Recovery emails that fail to send now show under Emails Failed right away instead of looking pending, so a store with broken email delivery can tell.
 
 = 1.1.1 =
 Maintenance release. The email delivery check no longer tells you your email is fine when it is not, the consent box at checkout stays unticked unless you choose otherwise, excluded shoppers now show up, and the reporting screens stay fast on busy stores.
