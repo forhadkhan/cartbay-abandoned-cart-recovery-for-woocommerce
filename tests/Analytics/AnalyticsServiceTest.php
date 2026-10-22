@@ -121,4 +121,28 @@ class AnalyticsServiceTest extends TestCase {
 		$this->assertSame( 2, $funnel['failed'] );
 		$this->assertSame( 3, $funnel['attempted'] );
 	}
+
+	/**
+	 * Attempted, delivered and canceled statuses are counted by their own rules.
+	 * A delivered email is sent; an attempted one has no outcome yet; a canceled
+	 * one that never tried is not an attempt.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @return void
+	 */
+	public function test_attempted_delivered_and_canceled_statuses(): void {
+		$funnel = $this->funnel(
+			array(
+				array( 'status' => 'attempted' ),
+				array( 'status' => 'delivered' ),
+				array( 'status' => 'canceled' ),
+			)
+		);
+
+		$this->assertSame( 0, $funnel['queued'] );
+		$this->assertSame( 1, $funnel['sent'] );
+		$this->assertSame( 0, $funnel['failed'] );
+		$this->assertSame( 2, $funnel['attempted'] );
+	}
 }
