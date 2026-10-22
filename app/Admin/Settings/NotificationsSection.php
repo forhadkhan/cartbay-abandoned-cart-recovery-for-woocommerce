@@ -308,7 +308,7 @@ class NotificationsSection extends AbstractSettingsSection {
 			array(
 				'label'   => __( 'Emails Failed', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 				'value'   => number_format_i18n( absint( $analytics['emails_failed'] ?? 0 ) ),
-				'tooltip' => __( 'Recovery emails tied to sessions in the selected period whose send failed, including those waiting to be retried.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
+				'tooltip' => __( 'Recovery emails tied to sessions in the selected period whose send is currently failed, including those waiting to be retried.', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
 			),
 			array(
 				'label'   => __( 'Email Acceptance Rate', 'cartbay-abandoned-cart-recovery-for-woocommerce' ),
