@@ -179,6 +179,10 @@ class AnalyticsService {
 	/**
 	 * Build the basic recovery-email delivery counts for a period.
 	 *
+	 * A notification waiting to retry has already failed an attempt, so it counts
+	 * as failed and is not also counted as queued. Counting it as queued hid a
+	 * failed send from the store owner until every retry had been used.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param array<int, WC_Order> $abandoned_sessions Abandoned sessions.
@@ -194,7 +198,7 @@ class AnalyticsService {
 		foreach ( $abandoned_sessions as $session ) {
 			foreach ( $this->get_notifications( $session ) as $notification ) {
 				$status = sanitize_key( (string) ( $notification['status'] ?? '' ) );
-				if ( in_array( $status, array( 'queued', 'retry_queued' ), true ) ) {
+				if ( 'queued' === $status ) {
 					++$queued;
 				}
 
@@ -206,7 +210,7 @@ class AnalyticsService {
 					++$sent;
 				}
 
-				if ( 'failed' === $status ) {
+				if ( in_array( $status, array( 'failed', 'retry_queued' ), true ) ) {
 					++$failed;
 				}
 			}
