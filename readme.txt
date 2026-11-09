@@ -6,7 +6,7 @@ Tested up to: 7.1
 Requires PHP: 8.0
 WC requires at least: 9.8
 WC tested up to: 11.2
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -184,9 +184,10 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 == Changelog ==
 
 = 1.1.3 =
-* Improved: a shopper who pays before the abandonment timer runs no longer receives recovery emails.
+* Improved: recovery emails are no longer sent to a shopper who pays before the abandonment timer runs.
 * Enhanced: orders placed with bank transfer or cheque, which stay on hold, now stop recovery emails.
 * Improved: before each recovery email CartBay checks again that the address has not ordered since, and skips the email with a reason in the log if it has.
+* Improved: after a purchase, the next cart in the same browser starts a fresh session, so it can be recovered on its own.
 * Enhanced: a background cleanup task now unschedules correctly.
 * Updated: the readme now says that WooCommerce removed its own abandoned cart recovery in 11.2.
 
@@ -219,6 +220,9 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.3 =
+Shoppers who pay before the abandonment timer runs, or whose order is on hold, no longer receive recovery emails. CartBay also re-checks for an order before every email it sends. Recommended for all stores.
 
 = 1.1.2 =
 Recovery emails that fail to send now show under Emails Failed right away instead of looking pending, so a store with broken email delivery can tell. Unsubscribe links in earlier emails also keep working after later emails are sent.
