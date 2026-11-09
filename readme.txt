@@ -184,10 +184,10 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 == Changelog ==
 
 = 1.1.3 =
-* Fixed: a shopper who pays before the abandonment timer runs no longer receives recovery emails.
-* Fixed: orders placed with bank transfer or cheque, which stay on hold, now stop recovery emails.
-* Fixed: before each recovery email CartBay checks again that the address has not ordered since, and skips the email with a reason in the log if it has.
-* Fixed: a background cleanup task now unschedules correctly.
+* Improved: a shopper who pays before the abandonment timer runs no longer receives recovery emails.
+* Enhanced: orders placed with bank transfer or cheque, which stay on hold, now stop recovery emails.
+* Improved: before each recovery email CartBay checks again that the address has not ordered since, and skips the email with a reason in the log if it has.
+* Enhanced: a background cleanup task now unschedules correctly.
 * Updated: the readme now says that WooCommerce removed its own abandoned cart recovery in 11.2.
 
 = 1.1.2 =
