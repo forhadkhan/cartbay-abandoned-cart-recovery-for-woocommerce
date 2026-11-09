@@ -227,6 +227,12 @@ class CaptureService {
 			return false;
 		}
 
+		// A session whose shopper already ordered is finished: the next cart gets a
+		// fresh session, so it can be abandoned and recovered on its own.
+		if ( absint( $session->get_meta( OrderGuard::ORDERED_META_KEY, true ) ) > 0 ) {
+			return false;
+		}
+
 		return in_array( $session->get_status(), array( 'cartbay-captured', 'cartbay-abandoned' ), true );
 	}
 

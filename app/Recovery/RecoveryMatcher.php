@@ -116,7 +116,7 @@ class RecoveryMatcher {
 		}
 
 		$status = $order->get_status();
-		if ( in_array( $status, array( 'processing', 'completed' ), true ) ) {
+		if ( in_array( $status, OrderGuard::ordered_statuses(), true ) ) {
 			$this->match( $order );
 		}
 	}
@@ -136,7 +136,7 @@ class RecoveryMatcher {
 	public function handle_status_change( int $order_id, string $from, string $to, WC_Order $order ): void {
 		unset( $order_id, $from );
 
-		if ( in_array( $to, array( 'processing', 'completed' ), true ) ) {
+		if ( in_array( $to, OrderGuard::ordered_statuses(), true ) ) {
 			$this->match( $order );
 		}
 	}
@@ -169,6 +169,10 @@ class RecoveryMatcher {
 
 		$abandoned_at = absint( $session->get_meta( '_cartbay_abandoned_at', true ) );
 		if ( 'cartbay-abandoned' !== $session->get_status() && 0 === $abandoned_at ) {
+			// Flag the session so the abandonment job leaves it captured: it is
+			// neither abandoned nor recovered, and never enters the email sequence.
+			$session->update_meta_data( OrderGuard::ORDERED_META_KEY, $order->get_id() );
+			$session->save();
 			$this->sessions->add_event(
 				$session->get_id(),
 				'completed_before_abandonment',
@@ -177,6 +181,12 @@ class RecoveryMatcher {
 					'revenue'  => $order->get_total(),
 				)
 			);
+			return;
+		}
+
+		// Statuses such as on-hold stop the sequence (see the send guard) but are
+		// not a paid order, so they are never attributed as recovered revenue.
+		if ( ! in_array( $order->get_status(), array( 'processing', 'completed' ), true ) ) {
 			return;
 		}
 
@@ -269,8 +279,8 @@ class RecoveryMatcher {
 	/**
 	 * Cancel all pending recovery email actions for a session.
 	 *
-	 * Action Scheduler stores args as JSON like [291,0] which doesn't match
-	 * the simple array(291) arg, so we query and delete directly.
+	 * Action Scheduler stores args as JSON like [291,0] and matches them exactly,
+	 * so each step is unscheduled with its full [session_id, step_index] args.
 	 *
 	 * @since 1.0.0
 	 *
@@ -285,6 +295,7 @@ class RecoveryMatcher {
 
 		// Recovery emails are scheduled per step with args [session_id, step_index]
 		// for the three recovery emails; cancel each pending step via the API.
+		// Action Scheduler matches args exactly, so the step index must be passed.
 		for ( $step = 0; $step < 3; $step++ ) {
 			as_unschedule_all_actions( 'cartbay_send_recovery_email', array( $session_id, $step ), 'cartbay' );
 		}

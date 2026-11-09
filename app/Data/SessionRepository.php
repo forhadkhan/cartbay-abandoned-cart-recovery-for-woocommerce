@@ -135,7 +135,7 @@ class SessionRepository {
 	public function get_inactive_captured( int $timeout_minutes ): array {
 		$cutoff = time() - ( absint( $timeout_minutes ) * MINUTE_IN_SECONDS );
 
-		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- WC CRUD lookup by CartBay-owned activity timestamp.
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- WC CRUD lookup by CartBay-owned activity timestamp.
 		$orders = $this->query_orders(
 			array(
 				'status'       => array( 'wc-cartbay-captured' ),
@@ -143,10 +143,18 @@ class SessionRepository {
 				'meta_value'   => $cutoff,
 				'meta_compare' => '<',
 				'meta_type'    => 'NUMERIC',
+				// Sessions whose shopper already ordered stay captured; skip them so
+				// they cannot fill the batch and starve real abandonments.
+				'meta_query'   => array(
+					array(
+						'key'     => '_cartbay_ordered_order_id',
+						'compare' => 'NOT EXISTS',
+					),
+				),
 				'limit'        => 100,
 			)
 		);
-		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
 		return $orders;
 	}
@@ -363,9 +371,14 @@ class SessionRepository {
 		$retention_days = isset( $settings['data_retention_days'] ) ? absint( $settings['data_retention_days'] ) : 30;
 
 		foreach ( $this->get_expired_sessions( $retention_days ) as $order ) {
-			// Cancel any pending recovery email actions for this session.
+			// Cancel any pending recovery email actions for this session. Action
+			// Scheduler matches args exactly, and each step is scheduled with
+			// [session_id, step_index] for the three recovery emails.
 			if ( function_exists( 'as_unschedule_all_actions' ) ) {
-				as_unschedule_all_actions( 'cartbay_send_recovery_email', array( $order->get_id() ), 'cartbay' );
+				for ( $step = 0; $step < 3; $step++ ) {
+					as_unschedule_all_actions( 'cartbay_send_recovery_email', array( $order->get_id(), $step ), 'cartbay' );
+				}
+				as_unschedule_all_actions( 'cartbay_detect_session_abandonment', array( $order->get_id() ), 'cartbay' );
 			}
 
 			// Force delete (skip trash).
