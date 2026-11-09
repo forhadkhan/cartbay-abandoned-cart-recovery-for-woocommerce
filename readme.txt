@@ -56,13 +56,11 @@ CartBay intentionally stays focused on doing one job well. It does **not** inclu
 * A/B testing
 * Exit-intent popups
 
-= Works alongside WooCommerce 11's built-in cart recovery =
+= If you run an older WooCommerce 11.0 or 11.1 store =
 
-WooCommerce 11 added an experimental **Abandoned cart recovery** option under **WooCommerce > Settings > Advanced > Features**. It sends one email, two hours after a shopper places an order that then goes unpaid.
+WooCommerce 11.0 added an experimental **Abandoned cart recovery** email, and WooCommerce 11.2 removed it. WooCommerce core has no cart recovery today, so on current versions CartBay is the only recovery email your shoppers receive.
 
-CartBay covers the much larger group that comes earlier: shoppers who reach your checkout and leave **without ever placing an order**. No order is created, so there is nothing for WooCommerce's feature to act on. For those shoppers CartBay captures a consented email at the checkout, runs a three-email sequence on your own schedule, and rebuilds their actual cart when they return.
-
-You can run both. While CartBay's capture is enabled, CartBay automatically tells WooCommerce to stand down, so **no shopper is ever emailed twice**. See the FAQ below for a full comparison.
+If a store still runs WooCommerce 11.0 or 11.1 with that option switched on, CartBay stops the WooCommerce email while CartBay's capture is enabled, so no shopper is emailed twice. If you turn CartBay's capture off, the WooCommerce email is left as you configured it.
 
 = Upgrade to CartBay Pro =
 
@@ -100,39 +98,20 @@ CartBay is fully GPL, contains no obfuscated code, and ships its JavaScript sour
 
 Yes. CartBay requires WooCommerce 9.8 or higher and WordPress 6.6 or higher.
 
-= WooCommerce 11 added its own abandoned cart recovery. Do I still need CartBay? =
+= WooCommerce 11.0 added its own abandoned cart email. Do I still need CartBay? =
 
-They solve different halves of the problem, and CartBay covers the half where most of the money is.
+Yes. WooCommerce 11.0 included an experimental abandoned cart email, and WooCommerce 11.2 removed it. WooCommerce core has no cart recovery today, so recovering abandoned carts needs a plugin such as CartBay.
 
-WooCommerce's feature (an experimental option under **WooCommerce > Settings > Advanced > Features**) acts on an **order that already exists**. A shopper has to fill in checkout, press Place Order, and then not pay — WooCommerce keeps that order as *pending* and, two hours later, sends **one** email linking back to the order's payment page.
+CartBay captures the shopper's email at checkout, with their explicit consent, before any order exists, then runs a three-email sequence with delays you set, rebuilds their actual cart when they return, and reports the revenue recovered.
 
-CartBay acts earlier, where the drop-off actually happens. Most shoppers never press Place Order at all: they reach checkout, start filling it in, and leave. No order is ever created, so there is nothing for WooCommerce's feature to act on. CartBay captures the email at that moment — with the shopper's explicit consent — and recovers the cart itself.
+= Will CartBay and WooCommerce's old email send two emails to the same shopper? =
 
-What CartBay adds on top:
+No. This only matters on WooCommerce 11.0 or 11.1 with the experimental **Abandoned cart recovery** option switched on. While CartBay's capture is enabled, CartBay stops that email using the `woocommerce_abandoned_cart_recovery_suppress` filter that WooCommerce provided. Turning CartBay's capture off leaves the WooCommerce email as you configured it.
 
-* **Recovery before an order exists** — the abandonment that never reaches Place Order.
-* **A three-email sequence** with independently configurable delays, instead of a single email at a fixed two hours.
-* **Consent-first capture**, with an unsubscribe link, a hashed suppression list, and WordPress's own privacy export and erase tools wired in.
-* **Real cart restore** — the shopper's cart is rebuilt with variations, merged into whatever they have now, and clamped to current stock, rather than being sent to a payment page for one specific order.
-* **Secure, expiring restore links** — hashed and valid for 48 hours, rather than a standard order-pay URL that does not expire.
-* **Coupons**, including validity checks before sending so a dead code is never emailed. WooCommerce's feature has no coupon support at all.
-* **Reporting** — captured, reminded and recovered carts, with recovered revenue attributed to the email that earned it.
-
-= Will CartBay and WooCommerce's feature send two emails to the same shopper? =
-
-No. While CartBay's capture is enabled, CartBay tells WooCommerce to stand down using the `woocommerce_abandoned_cart_recovery_suppress` filter that WooCommerce provides for this purpose, so one shopper never receives recovery mail from both systems.
-
-Note that WooCommerce's automatic sending is off by default in any case — it has to be enabled under **WooCommerce > Settings > Emails > Abandoned cart recovery**. CartBay's own session records are never picked up by WooCommerce's feature either, because they are not checkout orders.
-
-If you would rather run both, add this to your theme or a small plugin:
+If you would rather run both on those versions, add this to your theme or a small plugin:
 
 `add_filter( 'cartbay_suppress_woocommerce_recovery_email', '__return_false' );`
 
-Turning CartBay's capture off leaves WooCommerce's feature exactly as you configured it.
-
-= Should I turn WooCommerce's feature on as well? =
-
-You do not need to. If you do turn it on, leave CartBay's capture enabled and CartBay will keep the two from overlapping. The one thing WooCommerce's feature adds that CartBay does not is a manual "send a recovery email" button on the order edit screen for a specific unpaid order.
 
 = Does CartBay work with the Block Checkout? =
 
@@ -203,6 +182,13 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 `npm run build`
 
 == Changelog ==
+
+= 1.1.3 =
+* Fixed: a shopper who pays before the abandonment timer runs no longer receives recovery emails.
+* Fixed: orders placed with bank transfer or cheque, which stay on hold, now stop recovery emails.
+* Fixed: before each recovery email CartBay checks again that the address has not ordered since, and skips the email with a reason in the log if it has.
+* Fixed: a background cleanup task now unschedules correctly.
+* Updated: the readme now says that WooCommerce removed its own abandoned cart recovery in 11.2.
 
 = 1.1.2 =
 * Fixed: a recovery email that failed to send was counted as pending, so Emails Failed stayed at 0 and nothing showed that your store could not send mail until every retry was used up. A failed send now counts under Emails Failed straight away, including while it waits to be retried, and Pending Queue counts only the emails that have not been tried yet.
