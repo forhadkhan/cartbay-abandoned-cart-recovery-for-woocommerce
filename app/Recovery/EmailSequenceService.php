@@ -93,6 +93,31 @@ class EmailSequenceService {
 			return;
 		}
 
+		// Guard: never email a shopper who already ordered. This also protects
+		// sessions that were abandoned before the order check existed.
+		$ordered_id = OrderGuard::find_order_id( $session );
+		if ( $ordered_id > 0 ) {
+			$this->notifications->cancel_pending_for_session( $session_id, 'already_ordered' );
+			$this->sessions->add_event(
+				$session_id,
+				'email_skipped',
+				array(
+					'step'     => $step_index,
+					'reason'   => 'already_ordered',
+					'order_id' => $ordered_id,
+				)
+			);
+			Logger::info(
+				"Step {$step_index} skipped: shopper already ordered.",
+				array(
+					'session_id' => $session_id,
+					'order_id'   => $ordered_id,
+				),
+				'emails'
+			);
+			return;
+		}
+
 		// Guard: check suppression.
 		$email            = $session->get_billing_email();
 		$suppression_hash = TokenHelper::hash_email( $email );

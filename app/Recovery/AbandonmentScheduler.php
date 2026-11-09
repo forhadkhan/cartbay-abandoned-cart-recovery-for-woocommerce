@@ -112,6 +112,21 @@ class AbandonmentScheduler {
 	 * @return void
 	 */
 	private function mark_abandoned( WC_Order $session ): void {
+		// A shopper who already ordered is not abandoned: leave the session captured
+		// (so it counts neither as abandoned nor as recovered) and flag it so the
+		// inactive-session query stops returning it.
+		$ordered_id = absint( $session->get_meta( OrderGuard::ORDERED_META_KEY, true ) );
+		if ( 0 === $ordered_id ) {
+			$ordered_id = OrderGuard::find_order_id( $session );
+			if ( $ordered_id > 0 ) {
+				$session->update_meta_data( OrderGuard::ORDERED_META_KEY, $ordered_id );
+				$session->save();
+			}
+		}
+		if ( $ordered_id > 0 ) {
+			return;
+		}
+
 		$campaign = get_option( 'cartbay_campaign_settings', array() );
 
 		$session->set_status( 'wc-cartbay-abandoned' );
