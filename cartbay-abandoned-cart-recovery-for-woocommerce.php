@@ -40,6 +40,11 @@ if ( file_exists( CARTBAY_DIR . 'vendor/autoload.php' ) ) {
 	require_once CARTBAY_DIR . 'vendor/autoload.php';
 }
 
+// Shared WPAnchorBay deal banner: administrators only, closable, no external requests.
+if ( is_admin() ) {
+	require_once CARTBAY_DIR . 'includes/wpab-banner/wpab-banner-loader.php';
+}
+
 /**
  * Initialize the plugin after all plugins are loaded.
  *

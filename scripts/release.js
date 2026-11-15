@@ -103,6 +103,7 @@ async function copy_if_exists(src, dest) {
 		await copy_if_exists(path.join(ROOT_DIR, 'assets'), path.join(STAGE_DIR, 'assets'));
 		await copy_if_exists(path.join(ROOT_DIR, 'languages'), path.join(STAGE_DIR, 'languages'));
 		await copy_if_exists(path.join(ROOT_DIR, 'templates'), path.join(STAGE_DIR, 'templates'));
+		await copy_if_exists(path.join(ROOT_DIR, 'includes'), path.join(STAGE_DIR, 'includes'));
 
 		// Ship the un-minified JavaScript sources and the build tooling so the
 		// compiled assets in assets/js remain fully reproducible and reviewable,

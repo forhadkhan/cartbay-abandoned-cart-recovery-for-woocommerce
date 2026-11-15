@@ -4,6 +4,9 @@
 
     <file>app/</file>
 
+    <!-- Shared WPAnchorBay banner: kept byte-identical across plugins, never reformatted. -->
+    <exclude-pattern>*/includes/wpab-banner/*</exclude-pattern>
+
     <arg name="extensions" value="php"/>
     <arg name="colors"/>
     <arg value="sp"/>

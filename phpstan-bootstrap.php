@@ -48,3 +48,9 @@ if ( ! defined( 'CARTBAY_DOCS_EMAIL_SETUP_URL' ) ) {
 if ( ! defined( 'CARTBAY_SETTINGS_URL' ) ) {
 	define( 'CARTBAY_SETTINGS_URL', 'admin.php?page=wc-settings&tab=cartbay&section=settings' );
 }
+
+// Shared WPAnchorBay deal banner constants (defined by includes/wpab-banner/wpab-banner-loader.php in wp-admin).
+defined( 'WPAB_BANNER_STARTS' ) || define( 'WPAB_BANNER_STARTS', 1794470400 );
+defined( 'WPAB_BANNER_ENDS' ) || define( 'WPAB_BANNER_ENDS', 1797811199 );
+defined( 'WPAB_BANNER_META' ) || define( 'WPAB_BANNER_META', 'wpab_banner_dismissed' );
+defined( 'WPAB_BANNER_CAMPAIGN' ) || define( 'WPAB_BANNER_CAMPAIGN', 'blackfriday26' );

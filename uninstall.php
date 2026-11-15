@@ -8,6 +8,8 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+require_once __DIR__ . '/includes/wpab-banner/wpab-banner-uninstall.php';
+
 /**
  * Remove CartBay custom role capabilities.
  *
@@ -53,6 +55,8 @@ if ( is_string( $cartbay_remove_data_on_uninstall ) ) {
 }
 
 if ( ! $cartbay_remove_data_on_uninstall ) {
+	// The shared WPAnchorBay banner keeps its "closed" flag: this site did not ask for data removal.
+	wpab_banner_uninstall( WP_UNINSTALL_PLUGIN, false );
 	return;
 }
 
@@ -242,3 +246,6 @@ $wpdb->query(
 		$wpdb->esc_like( '_transient_timeout_cartbay_notification_ctx_' ) . '%'
 	)
 );
+
+// Last: the shared banner removes its "closed" flag only when the last WPAnchorBay plugin goes.
+wpab_banner_uninstall( WP_UNINSTALL_PLUGIN, true );
