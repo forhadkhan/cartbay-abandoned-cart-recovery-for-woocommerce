@@ -5,8 +5,8 @@ Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.0
 WC requires at least: 9.8
-WC tested up to: 11.2
-Stable tag: 1.1.3
+WC tested up to: 11.3
+Stable tag: 1.1.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -183,6 +183,9 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 
 == Changelog ==
 
+= 1.1.4 =
+* Updated: tested with WooCommerce 11.3.
+
 = 1.1.3 =
 * Improved: recovery emails are no longer sent to a shopper who pays before the abandonment timer runs.
 * Enhanced: orders placed with bank transfer or cheque, which stay on hold, now stop recovery emails.
@@ -220,6 +223,9 @@ To regenerate the compiled assets from source, run these commands in the plugin 
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.4 =
+Tested with WooCommerce 11.3.
 
 = 1.1.3 =
 Shoppers who pay before the abandonment timer runs, or whose order is on hold, no longer receive recovery emails. CartBay also re-checks for an order before every email it sends. Recommended for all stores.
