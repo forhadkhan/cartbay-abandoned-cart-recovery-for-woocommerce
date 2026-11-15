@@ -34,6 +34,10 @@ REQUIRED=(
     "assets/js/cartbay-block.js"
     "assets/js/cartbay-block.asset.php"
     "templates/emails/recovery-email-1.php"
+    "includes/wpab-banner/wpab-banner-loader.php"
+    "includes/wpab-banner/wpab-banner-uninstall.php"
+    "includes/wpab-banner/wpab-banner.html"
+    "includes/wpab-banner/wpab-banner-fonts-license.txt"
     "vendor/autoload.php"
     "languages/cartbay-abandoned-cart-recovery-for-woocommerce.pot"
 )

@@ -236,3 +236,17 @@ body.cartbay-is-read-only .woocommerce p.submit{display:none !important;}
 	.cartbay-wizard__schedule-row select,
 	.cartbay-wizard__test-email input{box-sizing:border-box;width:100%;}
 }
+
+/* Sale line in the footer, for sites without Pro. This stylesheet loads on CartBay screens only. It sits on its own
+   centred row above the footer links, because WooCommerce's footer text on its settings screens is long enough to run
+   under a line laid over the middle of the footer. */
+.cartbay-footer-promo{margin:0;padding-bottom:8px;text-align:center;font-weight:700;}
+.cartbay-footer-promo a{text-decoration:none;}
+
+/* WordPress hides the whole footer at 782px and below. When there is a sale line, bring the footer back for that
+   line alone, so the offer shows on phones too. */
+@media (max-width:782px){
+	#wpfooter:has(.cartbay-footer-promo){display:block;position:static;margin-inline-start:0;padding:0 20px 24px;}
+	#wpfooter:has(.cartbay-footer-promo) #footer-left,
+	#wpfooter:has(.cartbay-footer-promo) #footer-upgrade{display:none;}
+}

@@ -1,0 +1,352 @@
+<?php
+/**
+ * WPAnchorBay campaign banner loader.
+ *
+ * Ship this file next to wpab-banner.html in every WPAnchorBay plugin and require
+ * it from the plugin's admin bootstrap. wpab-banner.html is the chosen banner
+ * design (copy the final banner file here under that name).
+ *
+ * Several plugins can include this file on the same site: the first one to load
+ * wins and the rest do nothing, so there is only ever one banner, one dismissal
+ * flag and one AJAX handler.
+ *
+ * The CTA link's utm_source is `<plugin>-plugin-admin` (for example `spacebay-plugin-admin`) for the
+ * plugin whose screen shows the banner, and plain `plugin-admin` when it cannot tell which one.
+ *
+ * Behaviour:
+ *  - Shown to administrators only, and only between the start and end times below.
+ *  - Shown on the Plugins screen, on the active plugins' own screens and on their
+ *    WooCommerce > Settings tab (or Products section). The Dashboard is off unless a filter turns it on.
+ *  - Printed on `admin_notices`, except on WooCommerce > Settings where it is printed on
+ *    `all_admin_notices`, because WooCommerce Admin hides everything on `admin_notices` there.
+ *  - Hidden automatically after the end time, even from a cached page.
+ *  - Closing the banner saves when that user closed it, in user meta, so it stays
+ *    closed on every browser and device until the next date in WPAB_BANNER_RESHOW.
+ *    A new campaign (new WPAB_BANNER_CAMPAIGN value) shows again straight away.
+ *
+ * To run the next campaign: change the constants below and swap in that
+ * campaign's wpab-banner.html.
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( defined( 'WPAB_BANNER_LOADED' ) ) {
+	return;
+}
+define( 'WPAB_BANNER_LOADED', true );
+
+// Campaign id. Changing it makes the banner show again for users who dismissed the last one.
+define( 'WPAB_BANNER_CAMPAIGN', 'blackfriday26' );
+
+// Start: 12 Nov 2026, 08:00:00 UTC (12 Nov 2026, 2:00:00 PM Bangladesh, 3:00:00 AM EST).
+define( 'WPAB_BANNER_STARTS', 1794470400 );
+
+// End: 20 Dec 2026, 23:59:59 UTC (21 Dec 2026, 5:59:59 AM Bangladesh, 20 Dec 2026, 6:59:59 PM EST). The banner is not printed after this, and hides itself on a cached page.
+define( 'WPAB_BANNER_ENDS', 1797811199 );
+
+// A closed banner comes back at each of these times (Unix time, UTC).
+define(
+	'WPAB_BANNER_RESHOW',
+	array(
+		1795064400, // Thu 19 Nov 2026, 05:00 UTC (11:00 AM Bangladesh, 12:00 AM EST). One week in.
+		1795496400, // Tue 24 Nov 2026, 05:00 UTC (11:00 AM Bangladesh, 12:00 AM EST). Thanksgiving week.
+		1795712400, // Thu 26 Nov 2026, 17:00 UTC (11:00 PM Bangladesh, 12:00 PM EST). 12 hours before Black Friday.
+		1795971600, // Sun 29 Nov 2026, 17:00 UTC (11:00 PM Bangladesh, 12:00 PM EST). 12 hours before Cyber Monday.
+		1796619600, // Mon 7 Dec 2026, 05:00 UTC (11:00 AM Bangladesh, 12:00 AM EST).
+		1797224400, // Mon 14 Dec 2026, 05:00 UTC (11:00 AM Bangladesh, 12:00 AM EST).
+		1797570000, // Fri 18 Dec 2026, 05:00 UTC (11:00 AM Bangladesh, 12:00 AM EST). The last three days.
+	)
+);
+
+// The chosen banner design.
+define( 'WPAB_BANNER_FILE', __DIR__ . '/wpab-banner.html' );
+
+// User meta key that holds campaign id => the time the user last closed that campaign's banner.
+define( 'WPAB_BANNER_META', 'wpab_banner_dismissed' );
+
+if ( ! function_exists( 'wpab_banner_active_plugins' ) ) {
+	/**
+	 * Slugs of the WPAnchorBay plugins that are active on this site.
+	 * Matched on the exact plugin folder name (the WordPress.org slug).
+	 *
+	 * @return string[]
+	 */
+	function wpab_banner_active_plugins() {
+		// Short brand key (used by the banner) => the plugin's real WordPress.org folder slug.
+		$brands = array(
+			'campaignbay' => 'campaignbay',
+			'productbay'  => 'productbay',
+			'tubebay'     => 'tubebay',
+			'optionbay'   => 'optionbay-product-options-addons-woo',
+			'cartbay'     => 'cartbay-abandoned-cart-recovery-for-woocommerce',
+			'pointbay'    => 'pointbay-loyalty-points-referral-rewards-woo',
+			'notifybay'   => 'notifybay-waitlist-and-stock-alert-woo',
+			'upsellbay'   => 'upsellbay-order-bump-for-woocommerce',
+			'spacebay'    => 'spacebay',
+		);
+		$active = (array) get_option( 'active_plugins', array() );
+		if ( is_multisite() ) {
+			$active = array_merge( $active, array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+		}
+
+		$found = array();
+		foreach ( $brands as $key => $folder ) {
+			foreach ( $active as $plugin_file ) {
+				// Exact folder match, so other vendors' plugins with a similar name are not counted.
+				if ( dirname( (string) $plugin_file ) === $folder ) {
+					$found[] = $key;
+					break;
+				}
+			}
+		}
+		return $found;
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_on_screen' ) ) {
+	/**
+	 * Where the banner may appear:
+	 *  1. the Plugins screen,
+	 *  2. the active WPAnchorBay plugins' own admin pages (their dashboards and submenu screens),
+	 *  3. a plugin's tab inside WooCommerce > Settings,
+	 *  4. the main WordPress Dashboard, only when a site or plugin opts in (off by default).
+	 *
+	 * @param string[] $slugs Active plugin slugs.
+	 * @return bool
+	 */
+	function wpab_banner_on_screen( $slugs ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen ) {
+			return false;
+		}
+
+		if ( 'plugins' === $screen->id ) {
+			return true;
+		}
+
+		foreach ( $slugs as $slug ) {
+			if ( false !== stripos( $screen->id, $slug ) ) {
+				return true;
+			}
+		}
+
+		// All WooCommerce settings share one screen id, so the tab in the URL decides. The tab slug
+		// defaults to the plugin slug; use the filter when a plugin's tab slug is different.
+		if ( 'woocommerce_page_wc-settings' === $screen->id ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reads a tab name only, changes nothing.
+			$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+			$tabs = apply_filters( 'wpab_banner_wc_tabs', array_combine( $slugs, $slugs ), $slugs );
+			if ( $tab && in_array( $tab, (array) $tabs, true ) ) {
+				return true;
+			}
+
+			// A plugin that lives under a core tab (OptionBay: Products > its own section) is matched by
+			// the section in the URL. The core tab on its own (no section) stays banner-free.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reads a section name only, changes nothing.
+			$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( $_GET['section'] ) ) : '';
+			if ( 'products' === $tab && $section && in_array( $section, (array) $tabs, true ) ) {
+				return true;
+			}
+		}
+
+		// Off by default: Guideline 11 says advertising within the WordPress dashboard should be avoided.
+		if ( 'dashboard' === $screen->id && apply_filters( 'wpab_banner_show_on_dashboard', false ) ) {
+			return true;
+		}
+
+		/**
+		 * Let a plugin opt in admin screens whose id does not contain its brand key.
+		 *
+		 * @param bool      $show   Whether to show on this screen.
+		 * @param WP_Screen $screen Current screen.
+		 * @param string[]  $slugs  Active WPAnchorBay plugin keys.
+		 */
+		if ( apply_filters( 'wpab_banner_show_on_screen', false, $screen, $slugs ) ) {
+			return true;
+		}
+
+		return false;
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_is_dismissed' ) ) {
+	/**
+	 * Has the current user closed this campaign's banner since the latest show-again date?
+	 *
+	 * @return bool
+	 */
+	function wpab_banner_is_dismissed() {
+		$done = get_user_meta( get_current_user_id(), WPAB_BANNER_META, true );
+		if ( ! is_array( $done ) || ! isset( $done[ WPAB_BANNER_CAMPAIGN ] ) ) {
+			return false;
+		}
+
+		$latest = WPAB_BANNER_STARTS;
+		foreach ( WPAB_BANNER_RESHOW as $reshow ) {
+			if ( $reshow <= time() && $reshow > $latest ) {
+				$latest = $reshow;
+			}
+		}
+		return (int) $done[ WPAB_BANNER_CAMPAIGN ] >= $latest;
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_source' ) ) {
+	/**
+	 * Which WPAnchorBay plugin the admin is looking at, for the utm_source of the CTA link.
+	 * The plugin's own screen wins, then its WooCommerce > Settings tab or section, then the only
+	 * active plugin. Empty when several are active and the screen is not one of theirs (Plugins screen).
+	 *
+	 * @param string[] $slugs Active plugin keys.
+	 * @return string One of the fixed brand keys, or ''.
+	 */
+	function wpab_banner_source( $slugs ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen ) {
+			foreach ( $slugs as $slug ) {
+				if ( false !== stripos( $screen->id, $slug ) ) {
+					return $slug;
+				}
+			}
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- reads tab and section names only, changes nothing.
+			foreach ( array( 'tab', 'section' ) as $arg ) {
+				$value = isset( $_GET[ $arg ] ) ? sanitize_key( wp_unslash( $_GET[ $arg ] ) ) : '';
+				if ( $value && in_array( $value, $slugs, true ) ) {
+					return $value;
+				}
+			}
+			// phpcs:enable
+		}
+		return 1 === count( $slugs ) ? $slugs[0] : '';
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_print' ) ) {
+	/**
+	 * Print the banner with the active slugs and deadline filled in.
+	 */
+	function wpab_banner_print() {
+		if ( time() < WPAB_BANNER_STARTS || time() >= WPAB_BANNER_ENDS || ! current_user_can( 'manage_options' ) || wpab_banner_is_dismissed() ) {
+			return;
+		}
+
+		$slugs = wpab_banner_active_plugins();
+		if ( ! $slugs || ! wpab_banner_on_screen( $slugs ) ) {
+			return;
+		}
+
+		/**
+		 * Return false to hide the banner, for example on sites that already hold a Pro licence.
+		 *
+		 * @param bool     $show  Whether to show the banner.
+		 * @param string[] $slugs Active WPAnchorBay plugin slugs.
+		 */
+		if ( ! apply_filters( 'wpab_banner_show', true, $slugs ) ) {
+			return;
+		}
+
+		if ( ! is_readable( WPAB_BANNER_FILE ) ) {
+			return;
+		}
+
+		$html = (string) file_get_contents( WPAB_BANNER_FILE );
+		$html = preg_replace( '/data-plugins="[^"]*"/', 'data-plugins="' . esc_attr( implode( ',', $slugs ) ) . '"', $html, 1 );
+		$source = wpab_banner_source( $slugs );
+		if ( $source ) {
+			$html = str_replace( 'utm_source=plugin-admin', 'utm_source=' . rawurlencode( $source ) . '-plugin-admin', $html );
+		}
+		$html = preg_replace( '/data-ends="[^"]*"/', 'data-ends="' . esc_attr( gmdate( 'Y-m-d\TH:i:s\Z', WPAB_BANNER_ENDS ) ) . '"', $html, 1 );
+
+		$config = array(
+			'url'      => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'wpab_dismiss_banner' ),
+			'campaign' => WPAB_BANNER_CAMPAIGN,
+		);
+
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static bundled file, dynamic values escaped above.
+		?>
+		<script>
+		(function () {
+			var cfg = <?php echo wp_json_encode( $config ); ?>;
+			window.addEventListener('wpab:banner-dismissed', function () {
+				var body = new URLSearchParams();
+				body.set('action', 'wpab_dismiss_banner');
+				body.set('campaign', cfg.campaign);
+				body.set('_wpnonce', cfg.nonce);
+				try { fetch(cfg.url, { method: 'POST', credentials: 'same-origin', body: body }); } catch (e) { /* the banner is already closed for this page view */ }
+			});
+		})();
+		</script>
+		<?php
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_is_wc_settings_screen' ) ) {
+	/**
+	 * Is this the WooCommerce > Settings screen?
+	 *
+	 * WooCommerce Admin wraps everything printed on `admin_notices` in a hidden element on this
+	 * screen (and moves it later), so the banner would never be visible there.
+	 *
+	 * @return bool
+	 */
+	function wpab_banner_is_wc_settings_screen() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		return $screen && 'woocommerce_page_wc-settings' === $screen->id;
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_print_notice' ) ) {
+	/**
+	 * `admin_notices`: every screen except WooCommerce > Settings.
+	 */
+	function wpab_banner_print_notice() {
+		if ( ! wpab_banner_is_wc_settings_screen() ) {
+			wpab_banner_print();
+		}
+	}
+}
+
+if ( ! function_exists( 'wpab_banner_print_after_notices' ) ) {
+	/**
+	 * `all_admin_notices`: runs after WooCommerce has closed its hidden notice wrapper, so the
+	 * banner is printed visibly at the top of the content area. WooCommerce > Settings only.
+	 */
+	function wpab_banner_print_after_notices() {
+		if ( wpab_banner_is_wc_settings_screen() ) {
+			wpab_banner_print();
+		}
+	}
+}
+add_action( 'admin_notices', 'wpab_banner_print_notice' );
+add_action( 'all_admin_notices', 'wpab_banner_print_after_notices' );
+
+if ( ! function_exists( 'wpab_banner_dismiss' ) ) {
+	/**
+	 * AJAX: save when the current user closed this campaign's banner.
+	 */
+	function wpab_banner_dismiss() {
+		check_ajax_referer( 'wpab_dismiss_banner', '_wpnonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( null, 403 );
+		}
+
+		$campaign = isset( $_POST['campaign'] ) ? sanitize_key( wp_unslash( $_POST['campaign'] ) ) : '';
+		if ( WPAB_BANNER_CAMPAIGN !== $campaign ) {
+			wp_send_json_error( null, 400 );
+		}
+
+		$user_id = get_current_user_id();
+		$done    = get_user_meta( $user_id, WPAB_BANNER_META, true );
+		$done    = is_array( $done ) ? $done : array();
+		// Drop entries from the old list format (numeric keys), which held no close time.
+		$done              = array_filter( $done, 'is_string', ARRAY_FILTER_USE_KEY );
+		$done[ $campaign ] = time();
+		update_user_meta( $user_id, WPAB_BANNER_META, array_slice( $done, -20, null, true ) );
+		wp_send_json_success();
+	}
+}
+add_action( 'wp_ajax_wpab_dismiss_banner', 'wpab_banner_dismiss' );
