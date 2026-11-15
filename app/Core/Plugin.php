@@ -12,6 +12,7 @@ use WPAnchorBay\CartBay\Admin\Settings\AdminEnvironment;
 use WPAnchorBay\CartBay\Compat\CoreRecoveryEmail;
 use WPAnchorBay\CartBay\Admin\Settings\FieldRenderer;
 use WPAnchorBay\CartBay\Admin\Settings\MailEnvironmentDetector;
+use WPAnchorBay\CartBay\Admin\DealPromo;
 use WPAnchorBay\CartBay\Admin\Settings\SettingsPage;
 use WPAnchorBay\CartBay\Admin\Settings\SettingsUrl;
 use WPAnchorBay\CartBay\Analytics\AnalyticsService;
@@ -271,6 +272,9 @@ class Plugin {
 		add_filter( 'plugin_action_links_' . CARTBAY_BASENAME, array( $this, 'add_plugin_action_links' ) );
 		( new Privacy() )->register_hooks();
 		$this->settings_page()->register_hooks();
+		if ( is_admin() ) {
+			( new DealPromo() )->register_hooks();
+		}
 		add_action( 'wp_mail_failed', array( $this, 'handle_wp_mail_failed' ) );
 		add_action( 'wp_mail_succeeded', array( $this, 'handle_wp_mail_succeeded' ) );
 		add_action( 'cartbay_detect_abandonment', array( $this->abandonment_scheduler(), 'run' ) );
