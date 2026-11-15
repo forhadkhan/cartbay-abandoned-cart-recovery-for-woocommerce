@@ -37,6 +37,8 @@ Analytics are exposed through the admin overview section, the Notifications sect
 
 `restore_clicks` and `failed_restore_count` are counted from session event timestamps inside the selected reporting period. `click_to_recovery_rate` is calculated as link-restored purchases divided by restore-link clicks, not all recovered carts divided by clicks.
 
+The email funnel counts each notification once, by status. `emails_queued` counts `queued` only (not yet tried). `emails_failed` counts `failed` and `retry_queued`: a send that failed and is waiting to retry has already failed an attempt, so it shows as failed from the first failure (changed in 1.1.2; before that `retry_queued` counted as queued and a mail failure showed as Emails Failed 0 until all three attempts were used). `emails_sent` counts `sent` and `delivered`.
+
 ## Analytics Cache
 Analytics results are cached in the `cartbay_analytics_cache` transient. The recurring `cartbay_refresh_analytics` action refreshes analytics hourly.
 
