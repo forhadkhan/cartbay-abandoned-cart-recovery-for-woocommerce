@@ -161,3 +161,15 @@ The settings admin screen enqueues WordPress/WooCommerce dependencies and prints
 Inline JavaScript handles license removal confirmation, session filtering, test-flow triggering, and recovery sequence delay summaries. Inline CSS is printed for the settings UI.
 
 The same WooCommerce Backbone modal pattern is used for the license removal confirmation, log details, and Notification section More stats dialog.
+
+## Deal banner and footer sale line (1.1.4)
+
+- `includes/wpab-banner/` is the shared WPAnchorBay campaign banner (canonical copy in `/mnt/data/WPAnchorBay/wpab-banner`,
+  byte-identical in every plugin, excluded from phpcs). The loader is required at file scope behind `is_admin()` in the
+  main plugin file; `uninstall.php` calls `wpab_banner_uninstall()` on both the keep-data and remove-data paths.
+- `app/Admin/DealPromo.php` (registered in `Plugin::register_hooks()` behind `is_admin()`) filters `wpab_banner_show`:
+  hidden when `CARTBAY_PRO_VERSION` is defined and in the setup wizard; when CartBay is the only WPAnchorBay plugin it is
+  kept to the CartBay WC settings tab and a close is permanent for the campaign (no comeback dates, same as SpaceBay).
+- `DealPromo::footer_promo()` prints a Pro sale line in the footer of the CartBay tab on `in_admin_footer`, with phases
+  from the banner constants (`promo_phase()`); CSS in `assets/css/cartbay-admin.css` puts it on its own row because
+  WooCommerce's footer text is long.
